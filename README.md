@@ -76,7 +76,7 @@ Alle notwendigen Bibliotheken können entweder manuell installiert werden (Siehe
 * pip3 install ‑U scikit‑learn
 * pip3 install --no-binary imgaug imgaug
 * pip3 install https://github.com/lhelontra/tensorflow‑on‑arm/releases/download/v2.4.0/tensorflow‑2.4.0‑cp37‑none‑linux_armv7l.whl
- * sudo reboot
+  * sudo reboot
 ### OpenCV 4.5.5
 * free -m
 * wget https://github.com/Qengineering/Install‑OpenCV‑Raspberry‑Pi‑32‑bits/raw/main/OpenCV‑4‑5‑5.sh
@@ -107,33 +107,52 @@ Folgen einer Linie, die sowohl eine Rechts- als auch eine Linkskurve macht mit K
 #### FP7 - Erweiterte Linienverfolgung mit Hindernisserkennung
 Kombination von Linienverfolgung per Infrarot-Sensor und Hinderniserkennung per Ultraschall-Sensor.
 Das Auto soll einer Linie folgen bis ein Hindernis erkannt wird und dann anhalten.
-
 ## GIT-Wiki:
+### GIT-Einrichtung (RP4)
+#### SSH erzeugen
+* ssh-keygen -o (Beide Abfragen leer bestätigen, ausser man möchte auch ein Passwort vergeben.)
+  * Erzeugt den SSH-Key.
+* cat /home/pi/.ssh/id_rsa.pub
+  * Gibt den SSH-Key im Terminal aus. 
+* SSH-Key in GitHub registrieren
+  * In GitHub einloggen und in die Account-Settings unter SSH and GBP Keys navigieren
+  * Titel: Bezeichnung des verwendeten Geräts
+  * Key: SSH-Key
 #### Klonen eines vorhandenen Repositorys
 * git clone git@github.com:a3k2011/Camp2Code-Gruppe-4-Phase-1.git
 * git clone git@github.com:a3k2011/Camp2Code-Gruppe-4-Phase-2.git
 
+#### GIT-Konfiguration prüfen
+* cd REPOSITORYNAME
+* GitHub-Username und E-Mail konfiguieren:
+  * git config user.name "USERNAME"
+  * git config user.email EMAIL
+* git config --list
+  * Prüfung der Konfiguration.
+
+### Git-Kommandos
 #### Prüfung auf geänderte Dateien im eigenen Arbeitsverzeichnis
 * git status
 
 #### Auflistung aller durchgeführten push-Vorgänge
 * git log
 
+#### Liste der verfolgten Dateien
+* git ls-files
+
 #### Arbeitsverzeichnis auf den aktuellen Status bringen
 * git pull
 
 #### Arbeitsverzeichnis zu GIT-Hub hochladen
-1. git add --all oder (git add beispiel.txt)
-2. git commit -m "Hier steht das Kommentar"
-3. git push
+1. git pull
+2. git add --all oder (git add beispiel.txt)
+3. git commit -m "Hier steht das Kommentar"
+   * (Optional: Erweitern des letzten Commits)
+   * git commit --amend
+4. git push
 
-## GIT-Einrichtung
-* ssh-keygen -o (Beide Abfragen leer bestätigen.)
-* cat /home/pi/.ssh/id_rsa.pub
-* SSH-Key in GitHub einfügen
-
-#### GIT-Config prüfen
-* git config --list
+#### Entfernen der Änderungen im Staging-Bereich
+* git reset
 
 ## .gitignore
 Ignoriert im Arbeitsverzeichnis die folgenden Dateien bzw. Ordner:
