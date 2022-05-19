@@ -23,23 +23,23 @@ Das hier bereitgestellte Programm zum PiCar verfügt über die folgenden Funktio
 * ...
 
 ## Installation notwendiger Software auf dem RP4
-#### OS
+### OS
 Raspberry Pi Desktop
 * Debian Buster with Raspberry Pi Desktop
 * https://downloads.raspberrypi.org/rpd_x86/images/
 * Prüfe die installierte Version: cat /etc/*release
-#### Remote
+### Remote
 VNC auf dem Raspberry Pi 4 aktivieren. Session: "Xorg"
 * sudo apt-get install xrdp
 * sudo systemctl status xrdp
-#### Einstellungen
+### Einstellungen
 Einstellungen -> Raspberry-Pi-Konfiguration -> Schnittstellen
 * Kamera
 * SSH
 * VNC
 * SPI
 * I2C
-#### Allgemeines Projektphase 1
+### Allgemeines Projektphase 1
 * sudo apt-get update
 * sudo apt-get upgrade
   * sudo reboot
@@ -47,7 +47,7 @@ Einstellungen -> Raspberry-Pi-Konfiguration -> Schnittstellen
 * sudo apt-get install python3
 * sudo apt-get install libatlas-base-dev
   * sudo reboot
-#### Allgemeines Projektphase 2
+### Allgemeines Projektphase 2
 * sudo apt‑get install build‑essential cmake pkg‑config
 * sudo apt‑get install libavcodec‑dev libavformat‑dev libswscale‑dev libv4l‑dev
 * sudo apt‑get install libxvidcore‑dev libx264‑dev
@@ -62,6 +62,10 @@ Einstellungen -> Raspberry-Pi-Konfiguration -> Schnittstellen
 libv4l‑dev
 * sudo apt‑get install python3‑dev
   * sudo reboot
+### Modul-Verwaltung
+#### Requirements.txt
+Alle notwendigen Bibliotheken können entweder manuell installiert werden (Siehe nächster Abschnitt Python-Module) oder über die Requirements.txt Datei installiert werden.
+* pip3 install -r requirements.txt
 #### Python-Module
 * pip3 install --upgrade pip
 * pip3 install numpy
@@ -69,19 +73,16 @@ libv4l‑dev
 * pip3 install plotly
 * pip3 install dash pip3 install dash‑extensions
 * pip3 install dash_daq
-  * sudo reboot
-#### Tensorflow 2.4
+* pip3 install ‑U scikit‑learn
+* pip3 install imgaug imgaug
 * pip3 install https://github.com/lhelontra/tensorflow‑on‑arm/releases/download/v2.4.0/tensorflow‑2.4.0‑cp37‑none‑linux_armv7l.whl
-#### OpenCV 4.5.5
+ * sudo reboot
+### OpenCV 4.5.5
 * free -m
 * wget https://github.com/Qengineering/Install‑OpenCV‑Raspberry‑Pi‑32‑bits/raw/main/OpenCV‑4‑5‑5.sh
 * sudo chmod 755 ./OpenCV‑4‑5‑5.sh
 * ./OpenCV‑4‑5‑5.sh
   * sudo reboot
-#### Scikit-learn
-* pip3 install ‑U scikit‑learn
-#### Imggaug
-* pip3 install –no‑binary imgaug imgaug
 ## Fahrparcours
 #### FP1 - Vorwärts und Rückwärts
 Das Auto fährt mit langsamer Geschwindigkeit 3 Sekunden geradeaus, stoppt für 1 Sekunde und fährt 3 Sekunden rückwärts.
