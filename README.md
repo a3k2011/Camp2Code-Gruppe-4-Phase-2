@@ -71,7 +71,8 @@ Alle notwendigen Bibliotheken können entweder manuell installiert werden (Siehe
 * pip3 install numpy
 * pip3 install pandas
 * pip3 install plotly
-* pip3 install dash pip3 install dash‑extensions
+* pip3 install dash
+* pip3 install dash-extensions==0.0.70
 * pip3 install dash_daq
 * pip3 install ‑U scikit‑learn
 * pip3 install --no-binary imgaug imgaug
