@@ -1,4 +1,4 @@
-# Camp2Code_Project_1
+# Camp2Code_Project_2
 
 ## PiCar:
 Unter dem Einsatz eines Raspberry Pi Model 4 und dem Modelauto Bausatz Sunfounder PiCar-S, sowie in diesem Repository zur Verfügung gestellten Python-Code
