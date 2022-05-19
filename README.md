@@ -74,7 +74,7 @@ Alle notwendigen Bibliotheken können entweder manuell installiert werden (Siehe
 * pip3 install dash pip3 install dash‑extensions
 * pip3 install dash_daq
 * pip3 install ‑U scikit‑learn
-* pip3 install imgaug imgaug
+* pip3 install --no-binary imgaug imgaug
 * pip3 install https://github.com/lhelontra/tensorflow‑on‑arm/releases/download/v2.4.0/tensorflow‑2.4.0‑cp37‑none‑linux_armv7l.whl
  * sudo reboot
 ### OpenCV 4.5.5
