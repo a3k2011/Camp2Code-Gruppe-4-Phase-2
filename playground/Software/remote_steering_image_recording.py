@@ -81,7 +81,7 @@ def video_feed():
 
 
 app.layout = html.Div(children=[
-    html.H1("Remotesteuerung des Auto mit WSAD"),
+    html.H1("Remotesteuerung des Auto mit WASD"),
     html.H2("Einstellungen"),
     html.Div(
         [Keyboard(id="keyboard_down"), html.Div(id="output_down")],
