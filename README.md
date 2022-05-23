@@ -5,22 +5,18 @@ Unter dem Einsatz eines Raspberry Pi Model 4 und dem Modelauto Bausatz Sunfounde
 kann das Modellauto betrieben werden.
 
 #### Ausführung des Programms
-Das Modellauto kann über ein Plotly-Dashboard im Webbrowser oder direkt in der Konsole angesteuert werden.
+Das Modellauto kann über ein Plotly-Dashboard im Webbrowser angesteuert werden.
 * PiCar_Dashboard.py
-* PiCar.py
 
 #### Anleitung zum Sunfounder PiCar-S
 https://github.com/sunfounder/SunFounder_PiCar-S
 
 #### Funktionen des PiCars
 Das hier bereitgestellte Programm zum PiCar verfügt über die folgenden Funktionen:
-#### Projektphase 1:
-* Kalibrierung der IR-Sensoren
-* Ausgabe der Messwerte der IR-Sensoren
-* Fahrparcour 1-7
-* Manuelle Steuerung des PiCars über das Plotly-Dashboard im Webbrowser
-#### Projektphase 2:
 * ...
+* ...
+* Fahrparcour 1-2
+* Manuelle Steuerung des PiCars über das Plotly-Dashboard im Webbrowser
 
 ## Installation notwendiger Software auf dem RP4
 ### OS
@@ -91,23 +87,6 @@ Das Auto fährt mit langsamer Geschwindigkeit 3 Sekunden geradeaus, stoppt für 
 Das Auto fährt 1 Sekunde geradeaus, dann für 8 Sekunden mit maximalem Lenkwinkel im Uhrzeigersinn und stoppt.
 Dann soll das Auto diesen Fahrplan in umgekehrter Weise abfahren und an den Ausgangspunkt zurückkehren.
 Die Vorgehensweise soll für eine Fahrt im entgegengesetzen Uhrzeigersinn wiederholt werden.
-#### FP3 - Vorwärtsfahrt bis Hindernis
-Fahren bis ein Hindernis im Weg ist und dann stoppen. Während dieser Fahrt sollen die Fahrdaten 
-(Geschwindigkeit, Lenkwinkel, Fahrtrichtung, Sensordaten) aufgezeichnet werden.
-#### FP4 - Erkundungstour
-Das Auto soll geradeaus fahren und im Falle eines Hindernisses die Fahrtrichtung ändern und die Fahrt fortsetzen.
-Zur Änderung der Fahrrichtung soll ein maximaler Lenkwinkel eingeschlagen und rückwärts gefahren werden. Optional
-können sowohl die Geschwindigkeit als auch die Fahrtrichtung bei freier Fahrt variiert werden. Zusätzlich sollen die 
-Fahrdaten aufgezeichnet werden.
-#### FP5 - Linienverfolgung
-Folgen einer etwa 1,5 - 2 cm breiten Linie auf dem Boden. Das Auto soll stoppen, sobald das Auto das Ende der Linie erreicht hat.
-Als Test soll eine Linie genutzt werden, die sowohl eine Rechts- als auch eine Linkskurve macht. Die Kurvenradien sollen deutlich 
-größer sein als der maximale Radius, den das Auto ohne ausgleichende Fahrmanöver fahren kann.
-#### FP6 - Erweiterte Linienverfolgung
-Folgen einer Linie, die sowohl eine Rechts- als auch eine Linkskurve macht mit Kurvenradien kleiner als der maximale Lenkwinkel.
-#### FP7 - Erweiterte Linienverfolgung mit Hindernisserkennung
-Kombination von Linienverfolgung per Infrarot-Sensor und Hinderniserkennung per Ultraschall-Sensor.
-Das Auto soll einer Linie folgen bis ein Hindernis erkannt wird und dann anhalten.
 ## GIT-Wiki:
 ### GIT-Einrichtung (RP4)
 #### SSH erzeugen
