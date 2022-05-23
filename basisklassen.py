@@ -1,3 +1,5 @@
+# coding=utf-8
+#!/usr/bin/env python
 '''
     Information: Modules with base classes for project RPiCar
     File name: basisklassen.py
@@ -15,19 +17,19 @@ import numpy as np
 import math
 import RPi.GPIO as GPIO
 import smbus
-import json
+import cv2
 
 
 class Ultrasonic(object):
     """A class for the SunFounder ultrasonic modules
 
     Attributes:
-        CHANNEL (int): GPIO-Channel of the ultra sonic module. GPIO according to the Sunfounder setup
+        CHANNEL (int): GPIO-Channel of the ultra sonic module.
         preparation_time (float): Waiting time in milliseconds before sending the ultrasound pulse.
         impuls_length (float): Length of the ultrasound pulse.
         timeout (float): waiting time before stopping the measurement in form of the maximum measurement duration.
     """
-    CHANNEL = 20
+    CHANNEL = 20  # GPIO entsprechend des Sunfounder Setups
 
     def __init__(self, preparation_time: float = 0.01, impuls_length: float = 0.00001, timeout: float = 0.05) -> None:
         """_summary_
@@ -82,6 +84,7 @@ class Ultrasonic(object):
     def stop(self) -> None:
         """Sets GPIO (channel) of the Raspberry to False and stops possible noise of the sensor (shutdown)
         """
+        # Setzt GPIO als Output mit dem Wert False
         GPIO.setup(self.CHANNEL, GPIO.OUT)
         GPIO.output(self.CHANNEL, False)
 
@@ -97,7 +100,13 @@ class Ultrasonic(object):
             print('{} : {} {}'.format(i, distance, unit))
             time.sleep(.5)
 
+    """A class for the SunFounder infrared module.
 
+    Attributes:
+        ADDRESS (int): Address of the infrared module.
+        references (list): List of floats that serve as reference values.
+        bus (smbus): Bus of the infrared module.
+    """
 class Infrared(object):
     """A class for the SunFounder infrared module.
 
@@ -160,7 +169,7 @@ class Infrared(object):
                     analog_result[i] = high_byte + low_byte
                     if analog_result[i] > 1024:
                         continue
-                return analog_result
+                return analog_result  # ,raw_result
         else:
             raise IOError("Line follower read error. Please check the wiring.")
 
@@ -242,9 +251,8 @@ class Front_Wheels(object):
         """
         self._straight_angle = 90
         self._turning_offset = turning_offset
-        self._servo = Servo(self.FRONT_WHEEL_CHANNEL,
-                            bus_number=self.BUS_NUMBER, offset=self._turning_offset)
-        self._servo.setup()
+        self._servo = Servo(self.FRONT_WHEEL_CHANNEL, bus_number=self.BUS_NUMBER, offset=self._turning_offset)
+        self._servo.setup()  # Init the class with bus_number and address
         self._turning_max(self.MAX_TURNING_ANGLE)
 
     def _turning_max(self, angle: int) -> None:
@@ -256,8 +264,7 @@ class Front_Wheels(object):
         self._turning_max = angle
         self._min_angle = self._straight_angle - angle
         self._max_angle = self._straight_angle + angle
-        self._angles = {"left": self._min_angle,
-                        "straight": self._straight_angle, "right": self._max_angle}
+        self._angles = {"left": self._min_angle, "straight": self._straight_angle, "right": self._max_angle}
 
     def turn(self, angle: int) -> int:
         """Turn the front wheels to the given angle. Sets steering angle 'angle' as Int in the interval of 45-135° (90° straight ahead).
@@ -424,7 +431,7 @@ class Back_Wheels(object):
         self.stop()
         print('stop speed : {}'.format(self.speed))
         time.sleep(t * 2)
-        self.speed = 30
+        self.speed = 20
         print('forward speed : {}'.format(self.speed))
 
         time.sleep(t)
@@ -432,7 +439,7 @@ class Back_Wheels(object):
         print('now backward')
         print('backward speed : {}'.format(self.speed))
 
-        time.sleep(t * 6)
+        time.sleep(t)
         self.speed = 0
         print('stop speed : {}'.format(self.speed))
 
@@ -882,7 +889,6 @@ def main(modus):
         2: 'Test Vorderräder - Lenkung / Klasse: Front_Wheels',
         3: 'Test Ultraschallmodul / Klasse: Ultrasonic',
         4: 'Test Infrarotmodul / Klasse: Infrared',
-        5: 'Test der Lenkkalibrierung in config.json',
     }
 
     if modus == None:
@@ -894,7 +900,7 @@ def main(modus):
 
     while modus == None:
         modus = input('Wähle  (Andere Taste für Abbruch): ? ')
-        if modus in ['0', '1', '2', '3', '4', '5']:
+        if modus in ['1', '2', '3', '4']:
             break
         else:
             modus = None
@@ -937,25 +943,6 @@ def main(modus):
         print('Test Infrared')
         irm = Infrared()
         irm.test()
-    
-    if modus == 5:
-        with open("config.json", "r") as f:
-            data = json.load(f)
-            turning_offset = data["turning_offset"]
-            forward_A = data["forward_A"]
-            forward_B = data["forward_B"]
-            print("Test der Lenkkalibrierung in config.json")
-            print("Turning Offset: ", turning_offset)
-            print("Forward A: ", forward_A)
-            print("Forward B: ", forward_B)
-
-        fw = Front_Wheels(turning_offset=turning_offset)
-        fw.test()
-        time.sleep(1)
-        bw = Back_Wheels(forward_A=forward_A, forward_B=forward_B)
-        bw.test()
-
-        print('Ende des Tests der Lenkkalibrierung in config.json')
 
 
 if __name__ == '__main__':
