@@ -60,12 +60,14 @@ class CamCar(basecar.BaseCar):
 
         while self._active:
 
+            fixed_scale = self._frame_scale
+
             raw_frame = self.cam.get_frame()
-            scl_frame = pf.resize_frame(raw_frame, self._frame_scale)
+            scl_frame = pf.resize_frame(raw_frame, fixed_scale)
             height, width, _ = scl_frame.shape
             result_frame = np.copy(scl_frame)
 
-            canny_frame = pf.preprocess_frame(raw_frame, self._frame_scale, self._canny_lower, self._canny_upper)
+            canny_frame = pf.preprocess_frame(raw_frame, fixed_scale, self._canny_lower, self._canny_upper)
 
             try:
                 houghes_frame, pl, pr, pm = cl.get_lines(canny_frame)
