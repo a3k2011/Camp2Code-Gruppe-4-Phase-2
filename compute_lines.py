@@ -86,12 +86,12 @@ def center_lines(lines, image):
 
 rho = 1 #Pixel width of result
 theta = np.pi/180 #
-threshold = 40 # Threshold: min number of sections to detect a line
-minLineLength = 70 #min 40 px length to detect a line
-maxLineGap = 30#less px gaps get closed
+#threshold = 40 # Threshold: min number of sections to detect a line
+#minLineLength = 70 #min 40 px length to detect a line
+#maxLineGap = 30#less px gaps get closed
 
 
-def get_lines(image):
+def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
     """_summary_
 
     Args:
@@ -129,6 +129,8 @@ def get_lines(image):
             img_res = cv.line(img_res, (x1, y1),(x2, y2), (255,0,0),2)
         
         return img_res, pl, pr, pm
-    return image, (0,0),(0,0),(0,0)
+    else:
+        image = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
+        return image, (0,0),(0,0),(0,0)
         
         
