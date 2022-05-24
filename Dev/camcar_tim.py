@@ -4,6 +4,7 @@ import basecar
 import basisklassen_cam
 import datenlogger
 
+
 class CamCar(basecar.BaseCar):
     """Die Klasse CamCar fuegt die Funktion der Kamera zur BaseCar-Klasse hinzu.
 
@@ -59,5 +60,5 @@ class CamCar(basecar.BaseCar):
             
 
 if __name__ == "__main__":
-    camcar = CamCar()
-    camcar.testfahrt()
+    car = CamCar()
+    car.testfahrt()
