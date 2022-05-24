@@ -21,6 +21,9 @@ class CamCar(basecar.BaseCar):
         self._dl = datenlogger.Datenlogger(log_file_path="Logger")
         self._active = False
         self._lineframe = None
+        self._frame_scale = 1/3
+        self._canny_lower = 50
+        self._canny_upper = 150
 
     @property
     def drive_data(self):
@@ -54,7 +57,7 @@ class CamCar(basecar.BaseCar):
         while self._active:
 
             test = self.cam.get_frame()
-            self._lineframe = pf.preprocess_frame(test)
+            self._lineframe = pf.preprocess_frame(test, self._frame_scale, self._canny_lower, self._canny_upper)
 
             self._dl.append(self.drive_data)
             time.sleep(0.1)

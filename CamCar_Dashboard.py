@@ -147,7 +147,7 @@ CARD_ManuelleSteuerung = dbc.Card(
                             id="slider_speed",
                             value=40,
                             updatemode="drag",
-                        )
+                        ),
                     ],
                     width=8,
                 ),
@@ -172,6 +172,39 @@ COL_Headline = [  # Col Headline
         ],
         width=12,
     ),
+]
+COL_Tuning = [  # Col Tuning
+    dbc.Col(
+                    [
+                        dcc.Slider(
+                            min=1,
+                            max=10,
+                            step=1,
+                            id="slider_scale",
+                            value=3,
+                            updatemode="drag",
+                        ),
+                        html.Div(id='output-container-scale-slider'),
+                        dcc.Slider(
+                            min=0,
+                            max=255,
+                            step=5,
+                            id="slider_canny_lower",
+                            value=50,
+                            updatemode="drag",
+                        ),
+                        html.Div(id='output-container-canny-lower-slider'),
+                        dcc.Slider(
+                            min=0,
+                            max=255,
+                            step=5,
+                            id="slider_canny_upper",
+                            value=150,
+                            updatemode="drag",
+                        ),
+                        html.Div(id='output-container-canny-upper-slider'),
+                    ],
+            )
 ]
 COL_Logfiles = [  # Col Logfiles
     dbc.Row(
@@ -338,6 +371,14 @@ app.layout = dbc.Container(
         ),
         dbc.Row(
             [   # Row 3
+                dbc.Col(  # Tuning
+                    COL_Tuning,
+                ),
+            ],
+            style={"paddingTop": 20, "paddingBottom": 20},
+        ),
+        dbc.Row(
+            [   # Row 4
                 dbc.Col(  # Logfile-Handling
                     COL_Logfiles,
                 ),
@@ -345,7 +386,7 @@ app.layout = dbc.Container(
             style={"paddingTop": 20, "paddingBottom": 20},
         ),
         dbc.Row(
-            [   # Row 4
+            [   # Row 5
                 dbc.Col(  # Plot
                     COL_Plot,
                 ),
@@ -514,6 +555,22 @@ def button_action(btn_start, btn_stop, fp, speed):
         car._active = False
         time.sleep(1)
     return 0
+
+
+@app.callback(
+    Output('output-container-scale-slider', 'children'),
+    Output('output-container-canny-lower-slider', 'children'),
+    Output('output-container-canny-upper-slider', 'children'),
+    Input("slider_scale", "value"),
+    Input("slider_canny_lower", "value"),
+    Input("slider_canny_upper", "value"),
+)
+def slider_action(scale, canny_lower, canny_upper):
+    """XXX"""
+    car._frame_scale = 1/scale
+    car._canny_lower = canny_lower
+    car._canny_upper = canny_upper
+    return 'Frame-Scale: "{}"'.format(scale), 'Canny-Lower: "{}"'.format(canny_lower), 'Canny-Upper: "{}"'.format(canny_upper)
 
 
 if __name__ == "__main__":
