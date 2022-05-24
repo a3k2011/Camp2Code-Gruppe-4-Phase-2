@@ -3,6 +3,7 @@ import json
 import basecar
 import basisklassen_cam
 import datenlogger
+import preprocess_frame
 
 
 class CamCar(basecar.BaseCar):
@@ -47,14 +48,17 @@ class CamCar(basecar.BaseCar):
         """Funktion zur Ausfuerung einer Testfahrt."""
         self._active = True
         self._dl.start()
+        self.steering_angle = 90
         self.drive(v)
 
         while self._active:
 
-            self._lineframe = self.cam.get_frame()
+            test = self.cam.get_frame()
+            self._lineframe = preprocess_frame.preprocess_frame(test)
             self._dl.append(self.drive_data)
             time.sleep(0.1)
 
+        self._lineframe = None
         self.stop()
         self._dl.save()
             
