@@ -34,7 +34,6 @@ def video_feed():
     Returns:
         Response: Response object with the video feed
     """
-    print("Video Feed")
     return Response(car.get_image_bytes(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -96,7 +95,7 @@ def load_data_to_df(pfad):
 
 
 FP_LISTE = [  # Liste der auswählbaren Fahrprogramme
-    {"label": "FP 1, Testfahrt", "value": 1},
+    {"label": "FP 1, Parameter-Tuning", "value": 1},
 ]
 
 kpi_1 = dbc.Card([dbc.CardBody([html.H6("vMax"), html.P(id="kpi1")])])
@@ -173,9 +172,12 @@ COL_Headline = [  # Col Headline
         width=12,
     ),
 ]
+dbc.Col([html.P("Manuell on/off"), dbc.Switch(id="sw_manual")], width=4),
 COL_Tuning = [  # Col Tuning
     dbc.Col(
-                    [
+                    [   
+                        dbc.Switch(id="switch_canny"),
+                        html.Div(id='switch_canny-output'),
                         dcc.Slider(
                             min=1,
                             max=10,
@@ -295,7 +297,7 @@ COL_Fahrzeugsteuerung = [  # Col Fahrzeugsteuerung
             dbc.Col(
                 [
                     dbc.Button(
-                        children="Start Prog",
+                        children="Start",
                         id="btn_start",
                         color="dark",
                         className="me-1",
@@ -428,7 +430,7 @@ def joystick_values(angle, force, switch, max_Speed):
                 winkel = 0
                 dir = 0
                 car.drive(0, 0)
-                car.steering_angle = 0
+                car.steering_angle = 90
             else:
                 power = power * max_Speed
                 if power > max_Speed:
@@ -440,12 +442,12 @@ def joystick_values(angle, force, switch, max_Speed):
                     dir = -1
                     winkel = round(((angle - 180) / 2) - 45, 0)
                 car.drive(int(power), dir)
-                car.steering_angle = winkel
+                car.steering_angle = winkel+90
                 debug = f"Angle: {winkel} speed: {power} dir: {dir}"
         else:
             debug = "Man. mode off"
             car.drive(0, 0)
-            car.steering_angle = 0
+            car.steering_angle = 90
     else:
         debug = "None-Value"
     return debug
@@ -549,7 +551,7 @@ def button_action(btn_start, btn_stop, fp, speed):
     changed_id = [p["prop_id"] for p in callback_context.triggered][0]
     if "btn_start" in changed_id:
         if fp == 1:
-            car.testfahrt(speed)
+            car.parameter_tuning()
 
     if "btn_stop" in changed_id:
         car._active = False
@@ -558,19 +560,26 @@ def button_action(btn_start, btn_stop, fp, speed):
 
 
 @app.callback(
+    Output('switch_canny-output', 'children'),
     Output('output-container-scale-slider', 'children'),
     Output('output-container-canny-lower-slider', 'children'),
     Output('output-container-canny-upper-slider', 'children'),
+    Input('switch_canny', 'value'),
     Input("slider_scale", "value"),
     Input("slider_canny_lower", "value"),
     Input("slider_canny_upper", "value"),
 )
-def slider_action(scale, canny_lower, canny_upper):
+def slider_action(sw_canny, scale, canny_lower, canny_upper):
     """XXX"""
+    if sw_canny:
+        car._canny_frame = True
+    else:
+        car._canny_frame = False
+
     car._frame_scale = 1/scale
     car._canny_lower = canny_lower
     car._canny_upper = canny_upper
-    return 'Frame-Scale: "{}"'.format(scale), 'Canny-Lower: "{}"'.format(canny_lower), 'Canny-Upper: "{}"'.format(canny_upper)
+    return 'Canny Edge Detection: "{}"'.format(sw_canny), 'Frame-Scale: "{}"'.format(scale), 'Canny-Lower: "{}"'.format(canny_lower), 'Canny-Upper: "{}"'.format(canny_upper)
 
 
 if __name__ == "__main__":

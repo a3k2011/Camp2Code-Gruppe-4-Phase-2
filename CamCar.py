@@ -1,5 +1,7 @@
 import time, os.path
 import json
+import numpy as np
+import cv2 as cv
 import basecar
 import basisklassen_cam
 import datenlogger
@@ -22,8 +24,10 @@ class CamCar(basecar.BaseCar):
         self._active = False
         self._lineframe = None
         self._frame_scale = 1/3
+        self._canny_frame = False
         self._canny_lower = 50
         self._canny_upper = 150
+        self._houghLP = False
 
     @property
     def drive_data(self):
@@ -47,17 +51,31 @@ class CamCar(basecar.BaseCar):
                 b'Content-Type: image/jpeg\r\n\r\n' + jepg + b'\r\n\r\n')
             time.sleep(0.1)
 
-    def testfahrt(self, v):
+    def parameter_tuning(self):
         """Funktion zur Ausfuerung einer Testfahrt."""
         self._active = True
         self._dl.start()
         self.steering_angle = 90
-        self.drive(v)
+        self.direction = 1
+        self._houghLP = False
 
         while self._active:
 
             test = self.cam.get_frame()
-            self._lineframe = pf.preprocess_frame(test, self._frame_scale, self._canny_lower, self._canny_upper)
+            canny = pf.preprocess_frame(test, self._frame_scale, self._canny_lower, self._canny_upper)
+            #houghes, pl, pr, pm = cl.get_lines(canny)
+
+            if self._canny_frame:
+                height, width, _ = test.shape
+                img1 = cv.resize(test, (int(width*self._frame_scale), int(height*self._frame_scale)), interpolation = cv.INTER_CUBIC)
+                img2 = cv.cvtColor(canny, cv.COLOR_GRAY2RGB)
+                test = np.concatenate([img1, img2], axis=0)
+            if self._houghLP:
+                height, width, _ = test.shape
+                img1 = cv.resize(test, (int(width*self._frame_scale), int(height*self._frame_scale)), interpolation = cv.INTER_CUBIC)
+                test = np.concatenate([img1, houghes], axis=0)
+
+            self._lineframe = test
 
             self._dl.append(self.drive_data)
             time.sleep(0.1)
