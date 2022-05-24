@@ -189,7 +189,6 @@ COL_Tuning = [  # Col Tuning
                             updatemode="drag",
                         ),
                         html.Div(id='output-container-scale-slider'),
-                        html.Div(),
                         dcc.Slider(
                             min=0,
                             max=255,
@@ -208,7 +207,6 @@ COL_Tuning = [  # Col Tuning
                             updatemode="drag",
                         ),
                         html.Div(id='output-container-canny-upper-slider'),
-                        html.Div(),
                         dcc.Slider(
                             min=0,
                             max=100,
