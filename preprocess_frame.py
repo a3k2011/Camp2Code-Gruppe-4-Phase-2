@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-
+import basisklassen_cam
 
 def resize_frame(frame, resize_faktor):
     """XXX"""
@@ -25,9 +25,14 @@ def edge_detection(frame, low_border, upper_border):
 
 def crop_roi(frame):
     """XXX"""
+    height, _ = frame.shape
+    lower_border = int(height*0.25)
+    upper_border = int(height*0.85)
+    
+    frame = frame[lower_border:upper_border, 0:]
     return frame
 
-def preprocess_frame(cam_frame, resize_faktor=1/3, canny_lower=50, canny_upper= 150):
+def preprocess_frame(cam_frame, resize_faktor=1/1, canny_lower=50, canny_upper= 150):
     """XXX"""
     frame = np.copy(cam_frame)
     frame = resize_frame(frame, resize_faktor=resize_faktor)
@@ -36,3 +41,14 @@ def preprocess_frame(cam_frame, resize_faktor=1/3, canny_lower=50, canny_upper= 
     frame = crop_roi(frame)
 
     return frame
+
+if __name__ == "__main__":
+    cam = basisklassen_cam.Camera()
+    testbild = cam.get_frame()
+    print(testbild.shape)
+
+    cv.imshow("Originalbild", testbild)
+    cv.imshow("neues Testbild", preprocess_frame(testbild))
+
+    cv.waitKey(0)
+    cv.destroyAllWindows()    
