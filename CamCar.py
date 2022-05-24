@@ -26,7 +26,7 @@ class CamCar(basecar.BaseCar):
         self._frame_scale = 1
         self._canny_frame = False
         self._canny_lower = 50
-        self._canny_upper = 150
+        self._canny_upper = 125
         self._houghLP_frame = False
         self._houghes_threshold = 40
         self._houghes_minLineLength = 70

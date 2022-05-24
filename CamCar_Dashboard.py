@@ -203,7 +203,7 @@ COL_Tuning = [  # Col Tuning
                             max=255,
                             step=5,
                             id="slider_canny_upper",
-                            value=150,
+                            value=125,
                             updatemode="drag",
                         ),
                         html.Div(id='output-container-canny-upper-slider'),
