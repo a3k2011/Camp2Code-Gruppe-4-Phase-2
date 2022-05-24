@@ -57,9 +57,7 @@ class CamCar(basecar.BaseCar):
     def parameter_tuning(self):
         """Funktion zur Ausfuerung einer Testfahrt."""
         self._active = True
-        self._dl.start()
         self.steering_angle = 90
-        self.direction = 1
 
         while self._active:
 
@@ -67,7 +65,6 @@ class CamCar(basecar.BaseCar):
 
             raw_frame = self.cam.get_frame()
             scl_frame = pf.resize_frame(raw_frame, fixed_scale)
-            #height, width, _ = scl_frame.shape
             result_frame = np.copy(scl_frame)
 
             canny_frame = pf.preprocess_frame(raw_frame, fixed_scale, self._canny_lower, self._canny_upper)
@@ -86,14 +83,11 @@ class CamCar(basecar.BaseCar):
 
             self._lineframe = result_frame
 
-            self._dl.append(self.drive_data)
             time.sleep(0.1)
 
         self._lineframe = None
         self.stop()
-        self._dl.save()
             
 
 if __name__ == "__main__":
     car = CamCar()
-    car.testfahrt()
