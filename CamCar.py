@@ -60,22 +60,26 @@ class CamCar(basecar.BaseCar):
 
         while self._active:
 
-            test = self.cam.get_frame()
-            canny = pf.preprocess_frame(test, self._frame_scale, self._canny_lower, self._canny_upper)
-            houghes, pl, pr, pm = cl.get_lines(canny)
+            raw_frame = self.cam.get_frame()
+            scl_frame = pf.resize_frame(raw_frame, self._frame_scale)
+            height, width, _ = scl_frame.shape
+            result_frame = np.copy(scl_frame)
+
+            canny_frame = pf.preprocess_frame(raw_frame, self._frame_scale, self._canny_lower, self._canny_upper)
+
+            try:
+                houghes_frame, pl, pr, pm = cl.get_lines(canny_frame)
+            except:
+                houghes_frame = np.copy(cv.cvtColor(canny_frame, cv.COLOR_GRAY2RGB))
 
             if self._canny_frame:
-                height, width, _ = test.shape
-                img1 = cv.resize(test, (int(width*self._frame_scale), int(height*self._frame_scale)), interpolation = cv.INTER_CUBIC)
-                img2 = cv.cvtColor(canny, cv.COLOR_GRAY2RGB)
-                test = np.concatenate([img1, img2], axis=0)
-                
-            if self._houghLP_frame:
-                height, width, _ = test.shape
-                img1 = cv.resize(test, (int(width*self._frame_scale), int(height*self._frame_scale)), interpolation = cv.INTER_CUBIC)
-                test = np.concatenate([img1, houghes], axis=0)
+                canny_rgb_frame = cv.cvtColor(canny_frame, cv.COLOR_GRAY2RGB)
+                result_frame = np.concatenate([result_frame, canny_rgb_frame], axis=0)
 
-            self._lineframe = test
+            if self._houghLP_frame:
+                result_frame = np.concatenate([result_frame, houghes_frame], axis=0)
+
+            self._lineframe = result_frame
 
             self._dl.append(self.drive_data)
             time.sleep(0.1)

@@ -568,7 +568,7 @@ def button_action(btn_start, btn_stop, fp, speed):
     Output('output-container-canny-lower-slider', 'children'),
     Output('output-container-canny-upper-slider', 'children'),
     Input('switch_canny', 'value'),
-    Input('sw_houghes', 'value'),
+    Input('switch_houghes', 'value'),
     Input("slider_scale", "value"),
     Input("slider_canny_lower", "value"),
     Input("slider_canny_upper", "value"),
