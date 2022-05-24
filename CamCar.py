@@ -27,7 +27,7 @@ class CamCar(basecar.BaseCar):
         self._canny_frame = False
         self._canny_lower = 50
         self._canny_upper = 150
-        self._houghLP = False
+        self._houghLP_frame = False
 
     @property
     def drive_data(self):
@@ -57,20 +57,20 @@ class CamCar(basecar.BaseCar):
         self._dl.start()
         self.steering_angle = 90
         self.direction = 1
-        self._houghLP = False
 
         while self._active:
 
             test = self.cam.get_frame()
             canny = pf.preprocess_frame(test, self._frame_scale, self._canny_lower, self._canny_upper)
-            #houghes, pl, pr, pm = cl.get_lines(canny)
+            houghes, pl, pr, pm = cl.get_lines(canny)
 
             if self._canny_frame:
                 height, width, _ = test.shape
                 img1 = cv.resize(test, (int(width*self._frame_scale), int(height*self._frame_scale)), interpolation = cv.INTER_CUBIC)
                 img2 = cv.cvtColor(canny, cv.COLOR_GRAY2RGB)
                 test = np.concatenate([img1, img2], axis=0)
-            if self._houghLP:
+                
+            if self._houghLP_frame:
                 height, width, _ = test.shape
                 img1 = cv.resize(test, (int(width*self._frame_scale), int(height*self._frame_scale)), interpolation = cv.INTER_CUBIC)
                 test = np.concatenate([img1, houghes], axis=0)

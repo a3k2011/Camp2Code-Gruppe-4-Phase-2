@@ -178,6 +178,8 @@ COL_Tuning = [  # Col Tuning
                     [   
                         dbc.Switch(id="switch_canny"),
                         html.Div(id='switch_canny-output'),
+                        dbc.Switch(id="switch_houghes"),
+                        html.Div(id='switch_houghes-output'),
                         dcc.Slider(
                             min=1,
                             max=10,
@@ -561,25 +563,32 @@ def button_action(btn_start, btn_stop, fp, speed):
 
 @app.callback(
     Output('switch_canny-output', 'children'),
+    Output('switch_houghes-output', 'children'),
     Output('output-container-scale-slider', 'children'),
     Output('output-container-canny-lower-slider', 'children'),
     Output('output-container-canny-upper-slider', 'children'),
     Input('switch_canny', 'value'),
+    Input('sw_houghes', 'value'),
     Input("slider_scale", "value"),
     Input("slider_canny_lower", "value"),
     Input("slider_canny_upper", "value"),
 )
-def slider_action(sw_canny, scale, canny_lower, canny_upper):
+def slider_action(sw_canny, sw_houghes, scale, canny_lower, canny_upper):
     """XXX"""
     if sw_canny:
         car._canny_frame = True
     else:
         car._canny_frame = False
 
+    if sw_houghes:
+        car._houghLP_frame = True
+    else:
+        car._houghLP_frame = False
+
     car._frame_scale = 1/scale
     car._canny_lower = canny_lower
     car._canny_upper = canny_upper
-    return 'Canny Edge Detection: "{}"'.format(sw_canny), 'Frame-Scale: "{}"'.format(scale), 'Canny-Lower: "{}"'.format(canny_lower), 'Canny-Upper: "{}"'.format(canny_upper)
+    return 'Canny Edge Detection: "{}"'.format(sw_canny), 'Houghes Lines: "{}"'.format(sw_houghes), 'Frame-Scale: "{}"'.format(scale), 'Canny-Lower: "{}"'.format(canny_lower), 'Canny-Upper: "{}"'.format(canny_upper)
 
 
 if __name__ == "__main__":
