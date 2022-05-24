@@ -1,14 +1,14 @@
 import os, json, time
+import socket
 import pandas as pd
 import datetime
-from dash import dash, dcc, html, callback_context
 import plotly.express as px
+from dash import dash, dcc, html, callback_context
 from dash.dependencies import Input, Output, State
 import dash_daq as daq
 import dash_bootstrap_components as dbc
-import camcar_tim
-import socket
 from flask import Flask, Response, request
+import camcar_tim
 
 
 df = None
@@ -26,6 +26,7 @@ app = dash.Dash(
     ],
 )
 
+
 @server.route('/video_feed')
 def video_feed():
     """Will return the video feed from the camera
@@ -34,7 +35,7 @@ def video_feed():
         Response: Response object with the video feed
     """
     print("Video Feed")
-    return Response(car.get_camera(),
+    return Response(car.get_image_bytes(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
@@ -104,7 +105,6 @@ kpi_3 = dbc.Card([dbc.CardBody([html.H6("vMean"), html.P(id="kpi3")])])
 kpi_4 = dbc.Card([dbc.CardBody([html.H6("time"), html.P(id="kpi4")])])
 kpi_5 = dbc.Card([dbc.CardBody([html.H6("vm"), html.P(id="kpi5")])])
 
-
 row_joystick = dbc.Row(
     [
         dbc.Col([html.P("Manuell on/off"), dbc.Switch(id="sw_manual")], width=4),
@@ -156,7 +156,24 @@ CARD_ManuelleSteuerung = dbc.Card(
         row_joystick,
     ],
 )
-COL_Logfiles = [
+COL_Headline = [  # Col Headline
+    dbc.Col(
+        [  # Col 1
+            html.H1(
+                id="title_main",
+                children="Camp2Code - Gruppe 4",
+                style={
+                    "textAlign": "center",
+                    "marginTop": 40,
+                    "marginBottom": 40,
+                    "text-decoration": "underline",
+                },
+            )
+        ],
+        width=12,
+    ),
+]
+COL_Logfiles = [  # Col Logfiles
     dbc.Row(
         [
             html.H2(  # Überschrift
@@ -271,7 +288,7 @@ COL_Fahrzeugsteuerung = [  # Col Fahrzeugsteuerung
         justify="between",
     ),
     dbc.Row(
-        [
+        [  # Manuelle Steuerung
             CARD_ManuelleSteuerung,
         ]
     ),
@@ -301,18 +318,7 @@ app.layout = dbc.Container(
         dbc.Row(
             [  # Row 1
                 dbc.Col(
-                    [  # Col 1
-                        html.H1(
-                            id="title_main",
-                            children="Camp2Code - Gruppe 4",
-                            style={
-                                "textAlign": "center",
-                                "marginTop": 40,
-                                "marginBottom": 40,
-                            },
-                        )
-                    ],
-                    width=12,
+                    COL_Headline,
                 ),
             ],
             justify="center",
@@ -512,4 +518,3 @@ def button_action(btn_start, btn_stop, fp, speed):
 
 if __name__ == "__main__":
     app.run_server(debug=False, host=get_ip_address())
-    #app.run_server(host="0.0.0.0", port=8050, debug=False)
