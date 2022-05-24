@@ -4,11 +4,9 @@ import numpy as np
 
 def coords_from_line_function(line_f, image):
     """converts from line parameters to a 2-point-line from image bottom to 90% of image height
-
     Args:
         line_f (_type_): [m,t]
         image (_type_): _description_
-
     Returns:
         _type_: [x1,y1,x2,y2]
     """
@@ -21,10 +19,8 @@ def coords_from_line_function(line_f, image):
 
 def line_function_from_points(line):
     """Converts line from 2 points in line parameters
-
     Args:
         line (_type_): [x1, y1, x2, y2]
-
     Returns:
         list: [m,t]
     """
@@ -37,11 +33,9 @@ def line_function_from_points(line):
 def center_lines(lines, image):
     """receives lines from Hough Function and generates the centered line for left and right side
     adittionaly delivers the point left, right and front center  
-
     Args:
         lines (_type_): [[x1,y1,x2,y2],[x3,y3,x4,y4],...]
         image (_type_): _description_
-
     Returns:
         _type_: [[[left center line],[right center line]],point left, point right, point center front]
     """
@@ -91,12 +85,10 @@ theta = np.pi/180 #
 #maxLineGap = 30#less px gaps get closed
 
 
-def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
+def get_lines(image, threshold=40, minLineLength=70, maxLineGap=30):
     """_summary_
-
     Args:
         image (_type_): needs output of Canny-Function
-
     Returns:
         _type_: image, point left, point right, point center
     """
@@ -132,5 +124,3 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
     else:
         image = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
         return image, (0,0),(0,0),(0,0)
-        
-        

@@ -23,11 +23,14 @@ class CamCar(basecar.BaseCar):
         self._dl = datenlogger.Datenlogger(log_file_path="Logger")
         self._active = False
         self._lineframe = None
-        self._frame_scale = 1/3
+        self._frame_scale = 1
         self._canny_frame = False
         self._canny_lower = 50
         self._canny_upper = 150
         self._houghLP_frame = False
+        self._houghes_threshold = 40
+        self._houghes_minLineLength = 70
+        self._houghes_maxLineGap = 30
 
     @property
     def drive_data(self):
@@ -64,13 +67,13 @@ class CamCar(basecar.BaseCar):
 
             raw_frame = self.cam.get_frame()
             scl_frame = pf.resize_frame(raw_frame, fixed_scale)
-            height, width, _ = scl_frame.shape
+            #height, width, _ = scl_frame.shape
             result_frame = np.copy(scl_frame)
 
             canny_frame = pf.preprocess_frame(raw_frame, fixed_scale, self._canny_lower, self._canny_upper)
 
             try:
-                houghes_frame, pl, pr, pm = cl.get_lines(canny_frame)
+                houghes_frame, pl, pr, pm = cl.get_lines(canny_frame, self._houghes_threshold, self._houghes_minLineLength, self._houghes_maxLineGap)
             except:
                 houghes_frame = np.copy(cv.cvtColor(canny_frame, cv.COLOR_GRAY2RGB))
 

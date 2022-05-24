@@ -185,10 +185,11 @@ COL_Tuning = [  # Col Tuning
                             max=10,
                             step=1,
                             id="slider_scale",
-                            value=3,
+                            value=1,
                             updatemode="drag",
                         ),
                         html.Div(id='output-container-scale-slider'),
+                        html.Div(),
                         dcc.Slider(
                             min=0,
                             max=255,
@@ -207,6 +208,34 @@ COL_Tuning = [  # Col Tuning
                             updatemode="drag",
                         ),
                         html.Div(id='output-container-canny-upper-slider'),
+                        html.Div(),
+                        dcc.Slider(
+                            min=0,
+                            max=100,
+                            step=2,
+                            id="slider_houghes_threshold",
+                            value=40,
+                            updatemode="drag",
+                        ),
+                        html.Div(id='output-container-houghes_threshold'),
+                        dcc.Slider(
+                            min=0,
+                            max=140,
+                            step=2,
+                            id="slider_houghes_minLineLength",
+                            value=70,
+                            updatemode="drag",
+                        ),
+                        html.Div(id='output-container-houghes_minLineLength'),
+                        dcc.Slider(
+                            min=0,
+                            max=100,
+                            step=2,
+                            id="slider_houghes_maxLineGap",
+                            value=30,
+                            updatemode="drag",
+                        ),
+                        html.Div(id='output-container-houghes_maxLineGap'),
                     ],
             )
 ]
@@ -567,13 +596,19 @@ def button_action(btn_start, btn_stop, fp, speed):
     Output('output-container-scale-slider', 'children'),
     Output('output-container-canny-lower-slider', 'children'),
     Output('output-container-canny-upper-slider', 'children'),
+    Output('output-container-houghes_threshold', 'children'),
+    Output('output-container-houghes_minLineLength', 'children'),
+    Output('output-container-houghes_maxLineGap', 'children'),
     Input('switch_canny', 'value'),
     Input('switch_houghes', 'value'),
     Input("slider_scale", "value"),
     Input("slider_canny_lower", "value"),
     Input("slider_canny_upper", "value"),
+    Input("slider_houghes_threshold", "value"),
+    Input("slider_houghes_minLineLength", "value"),
+    Input("slider_houghes_maxLineGap", "value"),
 )
-def slider_action(sw_canny, sw_houghes, scale, canny_lower, canny_upper):
+def slider_action(sw_canny, sw_houghes, scale, canny_lower, canny_upper, houghes_threshold, houghes_minLineLength, houghes_maxLineGap):
     """XXX"""
     if sw_canny:
         car._canny_frame = True
@@ -588,7 +623,11 @@ def slider_action(sw_canny, sw_houghes, scale, canny_lower, canny_upper):
     car._frame_scale = 1/scale
     car._canny_lower = canny_lower
     car._canny_upper = canny_upper
-    return 'Canny Edge Detection: "{}"'.format(sw_canny), 'Houghes Lines: "{}"'.format(sw_houghes), 'Frame-Scale: "{}"'.format(scale), 'Canny-Lower: "{}"'.format(canny_lower), 'Canny-Upper: "{}"'.format(canny_upper)
+    car._houghes_threshold = houghes_threshold
+    car._houghes_minLineLength = houghes_minLineLength
+    car._houghes_maxLineGap = houghes_maxLineGap
+
+    return 'Canny Edge Detection: "{}"'.format(sw_canny), 'Houghes Lines: "{}"'.format(sw_houghes), 'Frame-Scale: "{}"'.format(scale), 'Canny-Lower: "{}"'.format(canny_lower), 'Canny-Upper: "{}"'.format(canny_upper), 'Houghes-Threshold: "{}"'.format(houghes_threshold), 'Houghes-minLineLength: "{}"'.format(houghes_minLineLength), 'Houghes-maxLineGap: "{}"'.format(houghes_maxLineGap)
 
 
 if __name__ == "__main__":
