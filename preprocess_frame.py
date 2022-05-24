@@ -21,7 +21,7 @@ def edge_detection(frame, low_border, upper_border):
 def crop_roi(frame):
     """XXX"""
     height, _ = frame.shape
-    lower_border = int(height*0.50)
+    lower_border = int(height*0.40)
     upper_border = int(height*0.85)
     
     frame = frame[lower_border:upper_border, :]
