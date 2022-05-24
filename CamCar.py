@@ -4,7 +4,7 @@ import basecar
 import basisklassen_cam
 import datenlogger
 import preprocess_frame as pf
-import compute_Lines as cl
+import compute_lines as cl
 
 class CamCar(basecar.BaseCar):
     """Die Klasse CamCar fuegt die Funktion der Kamera zur BaseCar-Klasse hinzu.
