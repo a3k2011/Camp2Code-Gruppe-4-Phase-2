@@ -7,6 +7,8 @@ import basisklassen_cam
 import datenlogger
 import preprocess_frame as pf
 import compute_lines as cl
+import steering as st
+
 
 class CamCar(basecar.BaseCar):
     """Die Klasse CamCar fuegt die Funktion der Kamera zur BaseCar-Klasse hinzu.
@@ -55,7 +57,7 @@ class CamCar(basecar.BaseCar):
             time.sleep(0.1)
 
     def parameter_tuning(self):
-        """Funktion zur Ausfuerung einer Testfahrt."""
+        """Funktion zur Ausfuerung des Parameter-Tunings."""
         self._active = True
         self.steering_angle = 90
 
@@ -74,6 +76,9 @@ class CamCar(basecar.BaseCar):
             except:
                 houghes_frame = np.copy(cv.cvtColor(canny_frame, cv.COLOR_GRAY2RGB))
 
+            if angle != 360:
+                self.steering_angle = st.steering_angle(angle)
+
             if self._canny_frame:
                 canny_rgb_frame = cv.cvtColor(canny_frame, cv.COLOR_GRAY2RGB)
                 result_frame = np.concatenate([result_frame, canny_rgb_frame], axis=0)
@@ -86,6 +91,28 @@ class CamCar(basecar.BaseCar):
             time.sleep(0.1)
 
         self._lineframe = None
+        self.stop()
+
+    def fp_opencv(self, v):
+        """Funktion zur Ausfuerung des Fahrparcours auf Basis OpenCV"""
+        self._active = True
+        self.steering_angle = 90
+
+        self.drive(v)
+        time.sleep(1)
+
+        self._active = False
+        self.stop()
+
+    def fp_deepnn(self, v):
+        """Funktion zur Ausfuerung des Fahrparcours auf Basis DeepNN"""
+        self._active = True
+        self.steering_angle = 90
+
+        self.drive(v)
+        time.sleep(1)
+
+        self._active = False
         self.stop()
             
 

@@ -95,7 +95,9 @@ def load_data_to_df(pfad):
 
 
 FP_LISTE = [  # Liste der auswählbaren Fahrprogramme
-    {"label": "FP 1, Parameter-Tuning", "value": 1},
+    {"label": "FP 1 --- Parameter-Tuning", "value": 1},
+    {"label": "FP 2 --- OpenCV", "value": 2},
+    {"label": "FP 3 --- DeepNN", "value": 3},
 ]
 
 kpi_1 = dbc.Card([dbc.CardBody([html.H6("vMax"), html.P(id="kpi1")])])
@@ -336,6 +338,20 @@ COL_Fahrzeugsteuerung = [  # Col Fahrzeugsteuerung
                 width=4,
             ),
             dbc.Col(
+                [   
+                    html.Div([
+                        dbc.Button(
+                        [dbc.Spinner(size="sm"), " Driving..."],
+                        color="primary",
+                        disabled=True,
+                        )],
+                        id='spinner_drive',
+                        style={'display':'none'},
+                    )
+                ],
+                width=4,
+            ),
+            dbc.Col(
                 [
                     dbc.Button(
                         children="STOP",
@@ -566,6 +582,7 @@ def updateFileList(value):
 
 @app.callback(
     Output("sw_manual", "value"),
+    Output('spinner_drive', 'style'),
     Input("btn_start", "n_clicks"),
     Input("btn_stop", "n_clicks"),
     State("dd_Fahrprogramm", "value"),
@@ -579,13 +596,20 @@ def button_action(btn_start, btn_stop, fp, speed):
     """
     changed_id = [p["prop_id"] for p in callback_context.triggered][0]
     if "btn_start" in changed_id:
+        #spinner_drive = {'display': 'block'}
         if fp == 1:
             car.parameter_tuning()
+        elif fp == 2:
+            car.fp_opencv(speed)
+        elif fp == 3:
+            car.fp_deepnn(speed)
 
     if "btn_stop" in changed_id:
+        #spinner_drive = {'display': 'none'}
         car._active = False
         time.sleep(1)
-    return 0
+
+    return 0, spinner_drive
 
 
 @app.callback(
