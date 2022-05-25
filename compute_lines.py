@@ -141,7 +141,8 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
         for line in lines:
             x1, y1, x2, y2 = line[0]
             frame_marked = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
-            frame_marked = cv.line(frame_marked, (x1, y1),(x2, y2), (255,0,255),2)
+            # einzeichnen der von Hough gefundenen Linien
+            frame_marked = cv.line(frame_marked, (x1, y1),(x2, y2), (0,0,255),3)
         cv.putText(frame_marked,
                     text_lines, 
                     org=(10,20),
@@ -154,7 +155,11 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
         try:
             for i, line in enumerate(marker):
                 x1, y1, x2, y2 = line
-                frame_marked = cv.line(frame_marked, (x1, y1),(x2, y2), (255,0,0),2)
+                # einzeichnen der berechneten Linien
+                color = (255,0,0)
+                if i==2:
+                    color = (0,255,0)
+                frame_marked = cv.line(frame_marked, (x1, y1),(x2, y2), color,2)
             
             return frame_marked, angle
         except:
@@ -208,7 +213,7 @@ def main():
         canny_frame =cv.Canny(blur_frame,180,220)
         
         #Hier kommt der Call der zu testenden Funktion
-        image, angle = get_lines(canny_frame, threshold=40, minLineLength=30, maxLineGap=20)
+        image, angle = get_lines(canny_frame, threshold=20, minLineLength=40, maxLineGap=20)
         
         txt_angle = f"LW: {angle:.2f}"
         cv.putText(image,
