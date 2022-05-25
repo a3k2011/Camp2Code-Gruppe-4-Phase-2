@@ -26,6 +26,8 @@ class CamCar(basecar.BaseCar):
         self._active = False
         self._lineframe = None
         self._frame_scale = 1
+        self._frame_blur = 1
+        self._frame_dilation = 2
         self._canny_frame = False
         self._canny_lower = 50
         self._canny_upper = 125
@@ -79,7 +81,7 @@ class CamCar(basecar.BaseCar):
             raw_frame = self.cam.get_frame()
             fixed_scale = self._frame_scale
 
-            canny_frame = pf.preprocess_frame(raw_frame, fixed_scale, self._canny_lower, self._canny_upper)
+            canny_frame = pf.preprocess_frame(raw_frame, fixed_scale, self._frame_blur, self._frame_dilation ,self._canny_lower, self._canny_upper)
             houghes_frame, line_angle = cl.get_lines(canny_frame, self._houghes_threshold, self._houghes_minLineLength, self._houghes_maxLineGap)
 
             steering_angle = st.steering_angle(line_angle)

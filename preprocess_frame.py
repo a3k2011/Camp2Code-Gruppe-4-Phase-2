@@ -17,9 +17,10 @@ def crop_roi(frame):
     frame = frame[lower_border:upper_border, :]
     return frame
 
-def blur_image(frame):
+def blur_image(frame, repetitions_blur):
     """XXX"""
-    frame = cv.GaussianBlur(frame, (3,3), 1)
+    for i in range(repetitions_blur):
+        frame = cv.GaussianBlur(frame, (3,3), 1)
     return frame
 
 def change_color_bgr2gray(frame):
@@ -32,9 +33,9 @@ def edge_detection(frame, low_border, upper_border):
     frame = cv.Canny(frame, low_border, upper_border)
     return frame
 
-def dilate_image(frame):
+def dilate_image(frame, kernel_size):
     """XXX"""
-    frame = cv.dilate(frame, np.ones((2,2), np.uint8), iterations=1)
+    frame = cv.dilate(frame, np.ones((kernel_size, kernel_size), np.uint8), iterations=1)
     return frame
 
 def binary_threshold(frame):
@@ -42,20 +43,21 @@ def binary_threshold(frame):
     th, frame = cv.threshold(frame, 0, 255, cv.THRESH_BINARY)
     return frame
 
-def preprocess_frame(raw_frame, resize_faktor=1/1, canny_lower=50, canny_upper= 125):
+def preprocess_frame(raw_frame, resize_faktor=1/1, repetitions_blur=1, kernel_size=3, canny_lower=50, canny_upper= 125):
     """XXX"""
     frame = np.copy(raw_frame)
     frame = resize_frame(frame, resize_faktor=resize_faktor)
     frame = crop_roi(frame)
-    frame = blur_image(frame)
+    frame = blur_image(frame, repetitions_blur=repetitions_blur)
     frame = change_color_bgr2gray(frame)
     frame = edge_detection(frame, low_border=canny_lower, upper_border=canny_upper)
-    frame = dilate_image(frame)
+    frame = dilate_image(frame, kernel_size=kernel_size)
     # frame = binary_threshold(frame)
 
     return frame
 
 if __name__ == "__main__":
+    """XXX"""
     cam = basisklassen_cam.Camera()
     testbild = cam.get_frame()
     print(testbild.shape)

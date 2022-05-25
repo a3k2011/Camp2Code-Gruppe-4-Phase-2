@@ -181,15 +181,14 @@ COL_Tuning = [  # Col Tuning
                         html.H2(
                             id="titel_Parameter_Tuning",
                             children="Parameter Tuning",
-                            style={
-                                "textAlign": "left",
-                                "paddingBottom": 0,
-                            },
+                            style={"textAlign": "left"},
                         ),
-                        html.Div(id='switch_canny-output'),
-                        dbc.Switch(id="switch_canny"),
-                        html.Div(id='switch_houghes-output'),
-                        dbc.Switch(id="switch_houghes"),
+                        dbc.Switch(id="switch_canny",
+                                    label=""
+                                    ),
+                        dbc.Switch(id="switch_houghes",
+                                    label=""
+                                    ),
                         html.Div(
                             [
                                 dbc.Button(
@@ -207,6 +206,24 @@ COL_Tuning = [  # Col Tuning
                                         step=1,
                                         id="slider_scale",
                                         value=1,
+                                        updatemode="drag",
+                                        ),
+                                        html.Div(id='output-container-blur-slider'),
+                                        dcc.Slider(
+                                        min=1,
+                                        max=5,
+                                        step=1,
+                                        id="slider_blur",
+                                        value=1,
+                                        updatemode="drag",
+                                        ),
+                                        html.Div(id='output-container-dilation-slider'),
+                                        dcc.Slider(
+                                        min=1,
+                                        max=5,
+                                        step=1,
+                                        id="slider_dilation",
+                                        value=2,
                                         updatemode="drag",
                                         ),
                                     ],
@@ -700,9 +717,11 @@ def button_action(btn_start, btn_stop, fp, speed):
 
 
 @app.callback(
-    Output('switch_canny-output', 'children'),
-    Output('switch_houghes-output', 'children'),
+    Output('switch_canny', 'label'),
+    Output('switch_houghes', 'label'),
     Output('output-container-scale-slider', 'children'),
+    Output('output-container-blur-slider', 'children'),
+    Output('output-container-dilation-slider', 'children'),
     Output('output-container-canny-lower-slider', 'children'),
     Output('output-container-canny-upper-slider', 'children'),
     Output('output-container-houghes_threshold', 'children'),
@@ -711,13 +730,15 @@ def button_action(btn_start, btn_stop, fp, speed):
     Input('switch_canny', 'value'),
     Input('switch_houghes', 'value'),
     Input("slider_scale", "value"),
+    Input("slider_blur", "value"),
+    Input("slider_dilation", "value"),
     Input("slider_canny_lower", "value"),
     Input("slider_canny_upper", "value"),
     Input("slider_houghes_threshold", "value"),
     Input("slider_houghes_minLineLength", "value"),
     Input("slider_houghes_maxLineGap", "value"),
 )
-def slider_action(sw_canny, sw_houghes, scale, canny_lower, canny_upper, houghes_threshold, houghes_minLineLength, houghes_maxLineGap):
+def slider_action(sw_canny, sw_houghes, scale, blur, dilation, canny_lower, canny_upper, houghes_threshold, houghes_minLineLength, houghes_maxLineGap):
     """XXX"""
     if sw_canny:
         car._canny_frame = True
@@ -730,13 +751,15 @@ def slider_action(sw_canny, sw_houghes, scale, canny_lower, canny_upper, houghes
         car._houghLP_frame = False
 
     car._frame_scale = 1/scale
+    car._frame_blur = blur
+    car._frame_dilation = dilation
     car._canny_lower = canny_lower
     car._canny_upper = canny_upper
     car._houghes_threshold = houghes_threshold
     car._houghes_minLineLength = houghes_minLineLength
     car._houghes_maxLineGap = houghes_maxLineGap
 
-    return 'Canny Edge Detection: "{}"'.format(sw_canny), 'Houghes Lines: "{}"'.format(sw_houghes), 'Frame-Scale: "{}"'.format(scale), 'Canny-Lower: "{}"'.format(canny_lower), 'Canny-Upper: "{}"'.format(canny_upper), 'Houghes-Threshold: "{}"'.format(houghes_threshold), 'Houghes-minLineLength: "{}"'.format(houghes_minLineLength), 'Houghes-maxLineGap: "{}"'.format(houghes_maxLineGap)
+    return 'Canny Edge Detection: "{}"'.format(sw_canny), 'Houghes Lines: "{}"'.format(sw_houghes), 'Frame-Scale: "{}"'.format(scale), 'Gaussian-Blur Repitions: "{}"'.format(blur), 'Dilation-Kernel-Size: "{}"'.format(dilation), 'Canny-Lower: "{}"'.format(canny_lower), 'Canny-Upper: "{}"'.format(canny_upper), 'Houghes-Threshold: "{}"'.format(houghes_threshold), 'Houghes-minLineLength: "{}"'.format(houghes_minLineLength), 'Houghes-maxLineGap: "{}"'.format(houghes_maxLineGap)
 
 
 if __name__ == "__main__":
