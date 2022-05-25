@@ -31,11 +31,17 @@ def coords_from_line_function(line_f, image):
         _type_: [x1,y1,x2,y2]
     """
     height = image.shape[0]
-    m,t = line_f
+    try:
+        m,t = line_f
+    except:
+        print("Line error", line_f)
     y1 = height
     y2 = 0
-    x1 = int((y1-t)/m)
-    x2 = int((y2-t)/m)
+    if m==np.inf:
+        x1 = x2 = t
+    else:
+        x1 = int((y1-t)/m)
+        x2 = int((y2-t)/m)
     return [x1, y1, x2, y2]
 
 def line_params_from_coords(line):
@@ -51,7 +57,7 @@ def line_params_from_coords(line):
     #params = np.polyfit((x1,x2),(y1,y2),1)
     if x1-x2 == 0:
         m=np.infty
-        t=0
+        t=x1
     else:
         m= (y1-y2)/(x1-x2)
         t=y1-(m*x1) 
@@ -68,6 +74,7 @@ def average_lines(lines, image):
     Returns:
         _type_: [left_average_line, right_average_line, middle_line],slope_of_middle_line
     """
+    height, width, _ = image.shape
     lines_l = []
     lines_r = []
     for line in lines:
@@ -79,9 +86,15 @@ def average_lines(lines, image):
                 lines_r.append(line_f)
     ll_av = np.average(lines_l, axis=0)
     lr_av = np.average(lines_r, axis=0)
-    
-    line_l = coords_from_line_function(ll_av, image)
-    line_r = coords_from_line_function(lr_av, image)
+    if len(lines_l)>0 and len(lines_r)>0:        
+        line_l = coords_from_line_function(ll_av, image)
+        line_r = coords_from_line_function(lr_av, image)
+    else:
+        # nicht genügend linien um etwas zu ermitteln -> Kreuz darstellen
+        line_l = [0,height,width,0]
+        line_r = [width,height,0,0]
+        ll_av = line_params_from_coords(line_l)
+        lr_av = line_params_from_coords(line_r)
     xl, yl, _,_ = line_l
     xr, _, _,_ = line_r
     
@@ -89,9 +102,11 @@ def average_lines(lines, image):
     p_intercept = intercept_point(ll_av, lr_av)
     line_middle = [p_middle[0], p_middle[1],p_intercept[0], p_intercept[1]]
     
-    line_middle_f = line_params_from_coords(line_middle)
-    
-    return [[line_l, line_r,line_middle], line_middle_f[0]]   
+    slope, _ = line_params_from_coords(line_middle)
+    angle = degrees(atan(slope))
+    if angle <0:
+        angle = 180 + angle
+    return [[line_l, line_r,line_middle], angle]   
 # Parameter for Hough 
 
 rho = 1 #Pixel width of result
@@ -102,7 +117,10 @@ theta = np.pi/180 #
 
 
 def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
-    """_summary_
+    """searches for lines in an image
+    eliminates horizontal lines
+    calculates the middle of similar sloped lines
+    
 
     Args:
         image (_type_): needs output of Canny-Function
@@ -110,7 +128,7 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
     Returns:
         _type_: image, direction in degree, 90 is straight
     """
-    f_height, f_width = image.shape
+    #f_height, f_width = image.shape
     lines = cv.HoughLinesP(image, 
                            rho, 
                            theta, 
@@ -129,63 +147,83 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
                     org=(10,20),
                     fontFace=cv.FONT_HERSHEY_COMPLEX, 
                     fontScale=0.6,
-                    color=(255,0,255),
+                    color=(255,0,0),
                     thickness=1)
         
-        marker, middle_slope = average_lines(lines, frame_marked)
-        img_res = frame_marked.copy()
+        marker, angle = average_lines(lines, frame_marked)
         try:
-            for i, line in enumerate(marker[0]):
+            for i, line in enumerate(marker):
                 x1, y1, x2, y2 = line
-                img_res = cv.line(img_res, (x1, y1),(x2, y2), (255,0,0),2)
+                frame_marked = cv.line(frame_marked, (x1, y1),(x2, y2), (255,0,0),2)
             
-            return img_res, degrees(atan(middle_slope))
+            return frame_marked, angle
         except:
-            print("No lines found")
+            print(marker)
             image = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
+            cv.putText(image,
+                    "Error drawing line", 
+                    org=(10,20),
+                    fontFace=cv.FONT_HERSHEY_COMPLEX, 
+                    fontScale=0.8,
+                    color=(0,0,255),
+                    thickness=1)
             return image, 90
     else:
         image = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
+        cv.putText(image,
+                    "No lines found", 
+                    org=(10,20),
+                    fontFace=cv.FONT_HERSHEY_COMPLEX, 
+                    fontScale=0.8,
+                    color=(0,255,0),
+                    thickness=1)
         return image, 90
-        
         
 def main():
     """
     zum testen der Funktion
-    Aufrug mit Parameter -sb (save blur) speichert letztes Frame als Blur.jpg ab
-    Aufrug mit Parameter -sc (save canny) speichert letztes Frame als Canny.jpg ab
+    Aufruf mit Parameter -sb (save blur) speichert letztes Frame als Blur.jpg ab
+    Aufruf mit Parameter -sc (save canny) speichert letztes Frame als Canny.jpg ab
     """
     cap = cv.VideoCapture(0)
     if not cap.isOpened():
         print("Cannot open camera")
         exit()
+    
     while True:
     # Abfrage eines Frames
         ret, frame = cap.read()
         height, width, _ = frame.shape
-        frame = cv.resize(frame,(int(width*1/3), int(height*1/3)), interpolation = cv.INTER_CUBIC)
+        #target size = 800x600
+        factor = 800 / width
+        frame = cv.resize(frame,(int(width*factor), int(height*factor)), interpolation = cv.INTER_CUBIC)
+        height, width, _ = frame.shape
         frame = cv.flip(frame,0)
         frame = cv.flip(frame,1)
-        roi_frame = frame[255:550,:750]
-        roi_frame = cv.cvtColor(roi_frame, cv.COLOR_BGR2GRAY)
+        
+        roi_frame = frame[int(height*0.4):int(height*0.85),:int(width*0.9)]
+        roi_gray = cv.cvtColor(roi_frame, cv.COLOR_BGR2GRAY)
         #roi_frame = cv.cvtColor(roi_frame, cv.COLOR_hs)
-        blur_frame = cv.GaussianBlur(roi_frame,(5,5),1)
+        blur_frame = cv.GaussianBlur(roi_gray,(5,5),1)
         canny_frame =cv.Canny(blur_frame,180,220)
         
-        """  lines = cv.HoughLinesP(canny_frame, rho, theta, threshold, None, minLineLength, maxLineGap )
-        text_lines = str(len(lines))+" lines found"
-        if len(blur_frame.shape) < 3:
-            frame_marked = cv.cvtColor(roi_frame.copy(), cv.COLOR_GRAY2RGB)
-        else:
-            frame_marked = roi_frame.copy()
-        for line in lines:
-            x1, y1, x2, y2 = line[0]
-            frame_marked = cv.line(frame_marked, (x1, y1),(x2, y2), (255,0,255),2)
-        """
-        image, angle = get_lines(canny_frame)
+        #Hier kommt der Call der zu testenden Funktion
+        image, angle = get_lines(canny_frame, threshold=40, minLineLength=30, maxLineGap=20)
         
-        print("Lenkwinkel:", angle)
-        cv.imshow("Press q to quit", image)
+        txt_angle = f"LW: {angle:.2f}"
+        cv.putText(image,
+                    txt_angle, 
+                    org=(10,50),
+                    fontFace=cv.FONT_HERSHEY_COMPLEX, 
+                    fontScale=0.8,
+                    color=(0,255,0),
+                    thickness=1)
+        canny_rgb = cv.cvtColor(canny_frame, cv.COLOR_GRAY2RGB)
+        
+        
+        frame_display = np.vstack((roi_frame, canny_rgb, image))
+        
+        cv.imshow("Press q to quit", frame_display)
         if cv.waitKey(20) &0xFF == ord("q"):
             if len(sys.argv)>1:
                 for arg in sys.argv:
