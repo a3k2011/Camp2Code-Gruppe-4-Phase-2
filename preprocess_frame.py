@@ -4,8 +4,9 @@ import basisklassen_cam
 
 def resize_frame(frame, resize_faktor):
     """XXX"""
-    height, width, _ = frame.shape
-    frame = cv.resize(frame, (int(width*resize_faktor), int(height*resize_faktor)), interpolation = cv.INTER_CUBIC)
+    if resize_faktor != 1:
+        height, width, _ = frame.shape
+        frame = cv.resize(frame, (int(width*resize_faktor), int(height*resize_faktor)), interpolation = cv.INTER_CUBIC)
     return frame
 
 def crop_roi(frame):
@@ -43,7 +44,7 @@ def binary_threshold(frame):
     th, frame = cv.threshold(frame, 0, 255, cv.THRESH_BINARY)
     return frame
 
-def preprocess_frame(raw_frame, resize_faktor=1/1, repetitions_blur=1, kernel_size=3, canny_lower=50, canny_upper= 125):
+def preprocess_frame(raw_frame, resize_faktor=1, repetitions_blur=1, kernel_size=3, canny_lower=50, canny_upper= 125):
     """XXX"""
     frame = np.copy(raw_frame)
     frame = resize_frame(frame, resize_faktor=resize_faktor)

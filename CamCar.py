@@ -77,7 +77,9 @@ class CamCar(basecar.BaseCar):
         self.steering_angle = 90
 
         while self._active:
-
+            
+            start = time.perf_counter()
+            
             raw_frame = self.cam.get_frame()
             fixed_scale = self._frame_scale
 
@@ -89,7 +91,8 @@ class CamCar(basecar.BaseCar):
                 self.steering_angle = steering_angle
 
             self._lineframe = self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
-            time.sleep(0.1)
+
+            print(time.perf_counter()-start)
 
         self._lineframe = None
         self.stop()
