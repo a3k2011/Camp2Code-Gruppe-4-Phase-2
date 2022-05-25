@@ -178,64 +178,132 @@ dbc.Col([html.P("Manuell on/off"), dbc.Switch(id="sw_manual")], width=4),
 COL_Tuning = [  # Col Tuning
     dbc.Col(
                     [   
-                        dbc.Switch(id="switch_canny"),
+                        html.H2(
+                            id="titel_Parameter_Tuning",
+                            children="Parameter Tuning",
+                            style={
+                                "textAlign": "left",
+                                "paddingBottom": 0,
+                            },
+                        ),
                         html.Div(id='switch_canny-output'),
-                        dbc.Switch(id="switch_houghes"),
+                        dbc.Switch(id="switch_canny"),
                         html.Div(id='switch_houghes-output'),
-                        dcc.Slider(
-                            min=1,
-                            max=10,
-                            step=1,
-                            id="slider_scale",
-                            value=1,
-                            updatemode="drag",
+                        dbc.Switch(id="switch_houghes"),
+                        html.Div(
+                            [
+                                dbc.Button(
+                                    "Pre-Processing",
+                                    id="collapse-button-pre",
+                                    color="primary",
+                                    n_clicks=0,
+                                ),
+                                dbc.Collapse(
+                                    [
+                                        html.Div(id='output-container-scale-slider'),
+                                        dcc.Slider(
+                                        min=1,
+                                        max=5,
+                                        step=1,
+                                        id="slider_scale",
+                                        value=1,
+                                        updatemode="drag",
+                                        ),
+                                    ],
+                                    id="collapse-pre",
+                                    is_open=False,
+                                    style={"paddingBottom": 10,
+                                           "paddingTop": 10,
+                                    },  
+                                ),
+                            ],
+                            style={"paddingBottom": 10},
                         ),
-                        html.Div(id='output-container-scale-slider'),
-                        dcc.Slider(
-                            min=0,
-                            max=255,
-                            step=5,
-                            id="slider_canny_lower",
-                            value=50,
-                            updatemode="drag",
+                        html.Div(
+                            [
+                                dbc.Button(
+                                    "Canny Edge Detection",
+                                    id="collapse-button-canny",
+                                    color="primary",
+                                    n_clicks=0,
+                                ),
+                                dbc.Collapse(
+                                    [
+                                        html.Div(id='output-container-canny-lower-slider'),
+                                        dcc.Slider(
+                                            min=0,
+                                            max=255,
+                                            step=5,
+                                            id="slider_canny_lower",
+                                            value=50,
+                                            updatemode="drag",
+                                        ),
+                                        html.Div(id='output-container-canny-upper-slider'),
+                                        dcc.Slider(
+                                            min=0,
+                                            max=255,
+                                            step=5,
+                                            id="slider_canny_upper",
+                                            value=125,
+                                            updatemode="drag",
+                                        ),
+                                    ],
+                                    id="collapse-canny",
+                                    is_open=False,
+                                    style={"paddingBottom": 10,
+                                           "paddingTop": 10,
+                                    },
+                                ),
+                            ],
+                            style={"paddingBottom": 10},
                         ),
-                        html.Div(id='output-container-canny-lower-slider'),
-                        dcc.Slider(
-                            min=0,
-                            max=255,
-                            step=5,
-                            id="slider_canny_upper",
-                            value=125,
-                            updatemode="drag",
-                        ),
-                        html.Div(id='output-container-canny-upper-slider'),
-                        dcc.Slider(
-                            min=0,
-                            max=100,
-                            step=2,
-                            id="slider_houghes_threshold",
-                            value=40,
-                            updatemode="drag",
-                        ),
-                        html.Div(id='output-container-houghes_threshold'),
-                        dcc.Slider(
-                            min=0,
-                            max=140,
-                            step=2,
-                            id="slider_houghes_minLineLength",
-                            value=70,
-                            updatemode="drag",
-                        ),
-                        html.Div(id='output-container-houghes_minLineLength'),
-                        dcc.Slider(
-                            min=0,
-                            max=100,
-                            step=2,
-                            id="slider_houghes_maxLineGap",
-                            value=30,
-                            updatemode="drag",
-                        ),
-                        html.Div(id='output-container-houghes_maxLineGap'),
+                        html.Div(
+                            [
+                                dbc.Button(
+                                    "Houghes Lines P",
+                                    id="collapse-button-houghes",
+                                    color="primary",
+                                    n_clicks=0,
+                                ),
+                                dbc.Collapse(
+                                    [
+                                        html.Div(id='output-container-houghes_threshold'),
+                                        dcc.Slider(
+                                            min=0,
+                                            max=100,
+                                            step=2,
+                                            id="slider_houghes_threshold",
+                                            value=40,
+                                            updatemode="drag",
+                                        ),
+                                        html.Div(id='output-container-houghes_minLineLength'),
+                                        dcc.Slider(
+                                            min=0,
+                                            max=140,
+                                            step=2,
+                                            id="slider_houghes_minLineLength",
+                                            value=70,
+                                            updatemode="drag",
+                                        ),
+                                        html.Div(id='output-container-houghes_maxLineGap'),
+                                        dcc.Slider(
+                                            min=0,
+                                            max=100,
+                                            step=2,
+                                            id="slider_houghes_maxLineGap",
+                                            value=30,
+                                            updatemode="drag",
+                                        ),
+                                    ],
+                                    id="collapse-houghes",
+                                    is_open=False,
+                                    style={"paddingBottom": 10,
+                                           "paddingTop": 10,
+                                    },
+                                ),
+                            ],
+                            style={"paddingBottom": 10},
+                        ),   
                     ],
             )
 ]
@@ -428,6 +496,42 @@ app.layout = dbc.Container(
         ),
     ]
 )
+
+
+@app.callback(
+    Output("collapse-pre", "is_open"),
+    [Input("collapse-button-pre", "n_clicks")],
+    [State("collapse-pre", "is_open")],
+)
+def toggle_collapse_pre(n, is_open):
+    """XXX"""
+    if n:
+        return not is_open
+    return is_open
+
+
+@app.callback(
+    Output("collapse-canny", "is_open"),
+    [Input("collapse-button-canny", "n_clicks")],
+    [State("collapse-canny", "is_open")],
+)
+def toggle_collapse_canny(n, is_open):
+    """XXX"""
+    if n:
+        return not is_open
+    return is_open
+
+
+@app.callback(
+    Output("collapse-houghes", "is_open"),
+    [Input("collapse-button-houghes", "n_clicks")],
+    [State("collapse-houghes", "is_open")],
+)
+def toggle_collapse_houghes(n, is_open):
+    """XXX"""
+    if n:
+        return not is_open
+    return is_open
 
 
 @app.callback(
