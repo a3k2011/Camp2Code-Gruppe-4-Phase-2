@@ -4,6 +4,8 @@ from math import *
 import sys 
 
 
+angle_invalid = 360
+
 def intercept_point(line1_p, line2_p):
     """calculates the intercept point between 2 parametrized lines
 
@@ -80,34 +82,38 @@ def average_lines(lines, image):
     for line in lines:
         line_f = (line_params_from_coords(line[0]))
         if line_f[0] != np.infty:
-            if (line_f[0]<0) and (line_f[0]> -1.5):
+            if (line_f[0]< -1):
                 lines_l.append(line_f)
-            elif (line_f[0]>0) and (line_f[0]<1.5):
+            elif (line_f[0]>1):
                 lines_r.append(line_f)
     ll_av = np.average(lines_l, axis=0)
     lr_av = np.average(lines_r, axis=0)
     if len(lines_l)>0 and len(lines_r)>0:        
         line_l = coords_from_line_function(ll_av, image)
         line_r = coords_from_line_function(lr_av, image)
+        xl, yl, _,_ = line_l
+        xr, _, _,_ = line_r
+        
+        #p_middle = (xl+(xr-xl)//2,yl)
+        p_middle = (width//2,height)
+        p_intercept = intercept_point(ll_av, lr_av)
+        line_middle = [p_middle[0], p_middle[1],p_intercept[0], p_intercept[1]]
+        
+        slope, _ = line_params_from_coords(line_middle)
+        angle = degrees(atan(slope))
+        if angle <0:
+            angle = 180 + angle
+        return [[line_l, line_r,line_middle], angle]   
+        
+        
     else:
-        # nicht genügend linien um etwas zu ermitteln -> Kreuz darstellen
+        # nicht genügend linien um etwas zu ermitteln -> Kreuz darstellen und Winkel auf 360 (ungültig)
         line_l = [0,height,width,0]
         line_r = [width,height,0,0]
         ll_av = line_params_from_coords(line_l)
         lr_av = line_params_from_coords(line_r)
-    xl, yl, _,_ = line_l
-    xr, _, _,_ = line_r
+        return [[line_l, line_r], angle_invalid] 
     
-    #p_middle = (xl+(xr-xl)//2,yl)
-    p_middle = (width//2,height)
-    p_intercept = intercept_point(ll_av, lr_av)
-    line_middle = [p_middle[0], p_middle[1],p_intercept[0], p_intercept[1]]
-    
-    slope, _ = line_params_from_coords(line_middle)
-    angle = degrees(atan(slope))
-    if angle <0:
-        angle = 180 + angle
-    return [[line_l, line_r,line_middle], angle]   
 # Parameter for Hough 
 
 rho = 1 #Pixel width of result
