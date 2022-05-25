@@ -81,7 +81,7 @@ def average_lines(lines, image):
     for line in lines:
         line_f = (line_params_from_coords(line[0]))
         if line_f[0] != np.infty:
-            if (line_f[0]< -1):
+            if (line_f[0]< -1): # Steigung 1 (oder -1) entspricht 45 Grad -> horizontale Linien werden ausgeblendet
                 lines_l.append(line_f)
             elif (line_f[0]>1):
                 lines_r.append(line_f)
@@ -149,9 +149,9 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
                            maxLineGap )
     if lines is not None:
         text_lines = str(len(lines))+" lines found"
+        frame_marked = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
         for line in lines:
             x1, y1, x2, y2 = line[0]
-            frame_marked = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
             # einzeichnen der von Hough gefundenen Linien
             frame_marked = cv.line(frame_marked, (x1, y1),(x2, y2), (0,0,255),3)
         cv.putText(frame_marked,
