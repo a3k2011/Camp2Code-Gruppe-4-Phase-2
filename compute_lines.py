@@ -56,7 +56,6 @@ def line_params_from_coords(line):
         _type_: [m,t]
     """
     x1, y1, x2, y2 = line
-    #params = np.polyfit((x1,x2),(y1,y2),1)
     if x1-x2 == 0:
         m=np.infty
         t=x1
@@ -94,10 +93,15 @@ def average_lines(lines, image):
         xl, yl, _,_ = line_l
         xr, _, _,_ = line_r
         
-        #p_middle = (xl+(xr-xl)//2,yl)
-        p_middle = (width//2,height)
+        # berechnen der mittleren Linie,
+        # der Offset ist zum Ausgleich eines Parallelen Versatzes zu den Linien
+        x_line_mid = xl+(xr-xl)//2
+        x_frame_mid = width//2
+        x_offset = x_line_mid - x_frame_mid
+        p_mid = (x_frame_mid,height)
         p_intercept = intercept_point(ll_av, lr_av)
-        line_middle = [p_middle[0], p_middle[1],p_intercept[0], p_intercept[1]]
+        
+        line_middle = [p_mid[0], p_mid[1],p_intercept[0]+x_offset, p_intercept[1]]
         
         slope, _ = line_params_from_coords(line_middle)
         angle = degrees(atan(slope))
@@ -168,6 +172,13 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
                     color = (0,255,0)
                 frame_marked = cv.line(frame_marked, (x1, y1),(x2, y2), color,2)
             
+                cv.putText(frame_marked,
+                    (f"LW {angle:.1f}"), 
+                    org=(10,50),
+                    fontFace=cv.FONT_HERSHEY_COMPLEX, 
+                    fontScale=0.8,
+                    color=(0,255,0),
+                    thickness=1)
             return frame_marked, angle
         except:
             print(marker)
@@ -179,6 +190,13 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
                     fontScale=0.8,
                     color=(0,0,255),
                     thickness=1)
+            cv.putText(image,
+                    (f"LW invalid"), 
+                    org=(10,50),
+                    fontFace=cv.FONT_HERSHEY_COMPLEX, 
+                    fontScale=0.8,
+                    color=(0,255,0),
+                    thickness=1)
             return image, angle_invalid
     else:
         image = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
@@ -189,6 +207,13 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
                     fontScale=0.8,
                     color=(0,255,0),
                     thickness=1)
+        cv.putText(image,
+                (f"LW invalid"), 
+                org=(10,50),
+                fontFace=cv.FONT_HERSHEY_COMPLEX, 
+                fontScale=0.8,
+                color=(0,255,0),
+                thickness=1)
         return image, angle_invalid
         
 def main():
@@ -223,13 +248,6 @@ def main():
         image, angle = get_lines(canny_frame, threshold=20, minLineLength=80, maxLineGap=50)
         
         txt_angle = f"LW: {angle:.2f}"
-        cv.putText(image,
-                    txt_angle, 
-                    org=(10,50),
-                    fontFace=cv.FONT_HERSHEY_COMPLEX, 
-                    fontScale=0.8,
-                    color=(0,255,0),
-                    thickness=1)
         canny_rgb = cv.cvtColor(canny_frame, cv.COLOR_GRAY2RGB)
         
         
