@@ -10,11 +10,11 @@ import dash_bootstrap_components as dbc
 from flask import Flask, Response, request
 import CamCar as CC
 
-
+"""Initialisiere DataFrame und Car."""
 df = None
 car = CC.CamCar()
 
-
+"""Initialisiere Flask-Server und Dash-APP."""
 server = Flask(__name__)
 app = dash.Dash(
     __name__,
@@ -93,22 +93,29 @@ def load_data_to_df(pfad):
     df = pd.read_json(os.path.join("Logger", pfad))
     df.columns = getLogItemsList()
 
-
+"""Liste der Fahrparcours fuer das Dropdown."""
 FP_LISTE = [  # Liste der auswählbaren Fahrprogramme
     {"label": "FP 1 --- Parameter-Tuning", "value": 1},
     {"label": "FP 2 --- OpenCV", "value": 2},
     {"label": "FP 3 --- DeepNN", "value": 3},
 ]
 
+"""CARDS der KPI."""
 kpi_1 = dbc.Card([dbc.CardBody([html.H6("vMax"), html.P(id="kpi1")])])
 kpi_2 = dbc.Card([dbc.CardBody([html.H6("vMin"), html.P(id="kpi2")])])
 kpi_3 = dbc.Card([dbc.CardBody([html.H6("vMean"), html.P(id="kpi3")])])
 kpi_4 = dbc.Card([dbc.CardBody([html.H6("time"), html.P(id="kpi4")])])
 kpi_5 = dbc.Card([dbc.CardBody([html.H6("vm"), html.P(id="kpi5")])])
 
+"""ROW der Joystick Ansicht."""
 row_joystick = dbc.Row(
     [
-        dbc.Col([html.P("Manuell on/off"), dbc.Switch(id="sw_manual")], width=4),
+        dbc.Col(
+            [
+                html.P("Manuell on/off"),
+                dbc.Switch(id="sw_manual"),
+            ], 
+            width=4),
         dbc.Col(
             daq.Joystick(id="joystick", size=100, className="mb-3"),
             width=4,
@@ -121,6 +128,8 @@ row_joystick = dbc.Row(
         ),
     ]
 )
+
+"""CARD der Manuellen Steuerung."""
 CARD_ManuelleSteuerung = dbc.Card(
     [
         dbc.Row(
@@ -146,7 +155,7 @@ CARD_ManuelleSteuerung = dbc.Card(
                             max=100,
                             step=10,
                             id="slider_speed",
-                            value=40,
+                            value=50,
                             updatemode="drag",
                         ),
                     ],
@@ -157,6 +166,8 @@ CARD_ManuelleSteuerung = dbc.Card(
         row_joystick,
     ],
 )
+
+"""Spalte der Headline."""
 COL_Headline = [  # Col Headline
     dbc.Col(
         [  # Col 1
@@ -165,8 +176,8 @@ COL_Headline = [  # Col Headline
                 children="Camp2Code - Gruppe 4",
                 style={
                     "textAlign": "center",
-                    "marginTop": 40,
-                    "marginBottom": 40,
+                    "marginTop": 20,
+                    "marginBottom": 10,
                     "text-decoration": "underline",
                 },
             )
@@ -174,156 +185,159 @@ COL_Headline = [  # Col Headline
         width=12,
     ),
 ]
-dbc.Col([html.P("Manuell on/off"), dbc.Switch(id="sw_manual")], width=4),
+
+"""Spalte des Parameter-Tunings."""
 COL_Tuning = [  # Col Tuning
     dbc.Col(
-                    [   
-                        html.H2(
-                            id="titel_Parameter_Tuning",
-                            children="Parameter Tuning",
-                            style={"textAlign": "left"},
+        [   
+            html.H2(
+                id="titel_Parameter_Tuning",
+                children="Parameter Tuning",
+                style={"textAlign": "left"},
+            ),
+            dbc.Switch(id="switch_canny",
+                        label=""
                         ),
-                        dbc.Switch(id="switch_canny",
-                                    label=""
-                                    ),
-                        dbc.Switch(id="switch_houghes",
-                                    label=""
-                                    ),
-                        html.Div(
-                            [
-                                dbc.Button(
-                                    "Pre-Processing",
-                                    id="collapse-button-pre",
-                                    color="primary",
-                                    n_clicks=0,
-                                ),
-                                dbc.Collapse(
-                                    [
-                                        html.Div(id='output-container-scale-slider'),
-                                        dcc.Slider(
-                                        min=1,
-                                        max=5,
-                                        step=1,
-                                        id="slider_scale",
-                                        value=1,
-                                        updatemode="drag",
-                                        ),
-                                        html.Div(id='output-container-blur-slider'),
-                                        dcc.Slider(
-                                        min=1,
-                                        max=5,
-                                        step=1,
-                                        id="slider_blur",
-                                        value=1,
-                                        updatemode="drag",
-                                        ),
-                                        html.Div(id='output-container-dilation-slider'),
-                                        dcc.Slider(
-                                        min=1,
-                                        max=5,
-                                        step=1,
-                                        id="slider_dilation",
-                                        value=2,
-                                        updatemode="drag",
-                                        ),
-                                    ],
-                                    id="collapse-pre",
-                                    is_open=False,
-                                    style={"paddingBottom": 10,
-                                           "paddingTop": 10,
-                                    },  
-                                ),
-                            ],
-                            style={"paddingBottom": 10},
+            dbc.Switch(id="switch_houghes",
+                        label=""
                         ),
-                        html.Div(
-                            [
-                                dbc.Button(
-                                    "Canny Edge Detection",
-                                    id="collapse-button-canny",
-                                    color="primary",
-                                    n_clicks=0,
-                                ),
-                                dbc.Collapse(
-                                    [
-                                        html.Div(id='output-container-canny-lower-slider'),
-                                        dcc.Slider(
-                                            min=0,
-                                            max=255,
-                                            step=5,
-                                            id="slider_canny_lower",
-                                            value=50,
-                                            updatemode="drag",
-                                        ),
-                                        html.Div(id='output-container-canny-upper-slider'),
-                                        dcc.Slider(
-                                            min=0,
-                                            max=255,
-                                            step=5,
-                                            id="slider_canny_upper",
-                                            value=125,
-                                            updatemode="drag",
-                                        ),
-                                    ],
-                                    id="collapse-canny",
-                                    is_open=False,
-                                    style={"paddingBottom": 10,
-                                           "paddingTop": 10,
-                                    },
-                                ),
-                            ],
-                            style={"paddingBottom": 10},
-                        ),
-                        html.Div(
-                            [
-                                dbc.Button(
-                                    "Houghes Lines P",
-                                    id="collapse-button-houghes",
-                                    color="primary",
-                                    n_clicks=0,
-                                ),
-                                dbc.Collapse(
-                                    [
-                                        html.Div(id='output-container-houghes_threshold'),
-                                        dcc.Slider(
-                                            min=0,
-                                            max=100,
-                                            step=2,
-                                            id="slider_houghes_threshold",
-                                            value=40,
-                                            updatemode="drag",
-                                        ),
-                                        html.Div(id='output-container-houghes_minLineLength'),
-                                        dcc.Slider(
-                                            min=0,
-                                            max=140,
-                                            step=2,
-                                            id="slider_houghes_minLineLength",
-                                            value=70,
-                                            updatemode="drag",
-                                        ),
-                                        html.Div(id='output-container-houghes_maxLineGap'),
-                                        dcc.Slider(
-                                            min=0,
-                                            max=100,
-                                            step=2,
-                                            id="slider_houghes_maxLineGap",
-                                            value=30,
-                                            updatemode="drag",
-                                        ),
-                                    ],
-                                    id="collapse-houghes",
-                                    is_open=False,
-                                    style={"paddingBottom": 10,
-                                           "paddingTop": 10,
-                                    },
-                                ),
-                            ],
-                            style={"paddingBottom": 10},
-                        ),   
-                    ],
-            )
+            html.Div(
+                [
+                    dbc.Button(
+                        "Pre-Processing",
+                        id="collapse-button-pre",
+                        color="primary",
+                        n_clicks=0,
+                    ),
+                    dbc.Collapse(
+                        [
+                            html.Div(id='output-container-scale-slider'),
+                            dcc.Slider(
+                            min=1,
+                            max=5,
+                            step=1,
+                            id="slider_scale",
+                            value=1,
+                            updatemode="drag",
+                            ),
+                            html.Div(id='output-container-blur-slider'),
+                            dcc.Slider(
+                            min=1,
+                            max=5,
+                            step=1,
+                            id="slider_blur",
+                            value=1,
+                            updatemode="drag",
+                            ),
+                            html.Div(id='output-container-dilation-slider'),
+                            dcc.Slider(
+                            min=1,
+                            max=5,
+                            step=1,
+                            id="slider_dilation",
+                            value=2,
+                            updatemode="drag",
+                            ),
+                        ],
+                        id="collapse-pre",
+                        is_open=False,
+                        style={"paddingBottom": 10,
+                                "paddingTop": 10,
+                        },  
+                    ),
+                ],
+                style={"paddingBottom": 10},
+            ),
+            html.Div(
+                [
+                    dbc.Button(
+                        "Canny Edge Detection",
+                        id="collapse-button-canny",
+                        color="primary",
+                        n_clicks=0,
+                    ),
+                    dbc.Collapse(
+                        [
+                            html.Div(id='output-container-canny-lower-slider'),
+                            dcc.Slider(
+                                min=0,
+                                max=255,
+                                step=5,
+                                id="slider_canny_lower",
+                                value=50,
+                                updatemode="drag",
+                            ),
+                            html.Div(id='output-container-canny-upper-slider'),
+                            dcc.Slider(
+                                min=0,
+                                max=255,
+                                step=5,
+                                id="slider_canny_upper",
+                                value=125,
+                                updatemode="drag",
+                            ),
+                        ],
+                        id="collapse-canny",
+                        is_open=False,
+                        style={"paddingBottom": 10,
+                                "paddingTop": 10,
+                        },
+                    ),
+                ],
+                style={"paddingBottom": 10},
+            ),
+            html.Div(
+                [
+                    dbc.Button(
+                        "Houghes Lines P",
+                        id="collapse-button-houghes",
+                        color="primary",
+                        n_clicks=0,
+                    ),
+                    dbc.Collapse(
+                        [
+                            html.Div(id='output-container-houghes_threshold'),
+                            dcc.Slider(
+                                min=0,
+                                max=100,
+                                step=2,
+                                id="slider_houghes_threshold",
+                                value=40,
+                                updatemode="drag",
+                            ),
+                            html.Div(id='output-container-houghes_minLineLength'),
+                            dcc.Slider(
+                                min=0,
+                                max=140,
+                                step=2,
+                                id="slider_houghes_minLineLength",
+                                value=70,
+                                updatemode="drag",
+                            ),
+                            html.Div(id='output-container-houghes_maxLineGap'),
+                            dcc.Slider(
+                                min=0,
+                                max=100,
+                                step=2,
+                                id="slider_houghes_maxLineGap",
+                                value=30,
+                                updatemode="drag",
+                            ),
+                        ],
+                        id="collapse-houghes",
+                        is_open=False,
+                        style={"paddingBottom": 10,
+                                "paddingTop": 10,
+                        },
+                    ),
+                ],
+                style={"paddingBottom": 10},
+            ),   
+        ],
+    )
 ]
+
+"""Spalte der Log-Files."""
 COL_Logfiles = [  # Col Logfiles
     dbc.Row(
         [
@@ -352,6 +366,8 @@ COL_Logfiles = [  # Col Logfiles
         style={"paddingTop": 10, "paddingBottom": 10},
     ),
 ]
+
+"""Spalte der Plots."""
 COL_Plot = [  # Col Plot
     dbc.Row(
             [
@@ -371,7 +387,7 @@ COL_Plot = [  # Col Plot
                 dcc.Graph(id="plot_Logfile"),
                         html.P(
                             id="Fussnote",
-                            children="hier das Copyright ;)",
+                            children="...hier das Copyright ;)",
                             style={"textAlign": "right"},
                         ),
                         html.Div(id="dummy"),
@@ -384,6 +400,8 @@ COL_Plot = [  # Col Plot
             ]
     )
 ]
+
+"""Spalte der Fahrzeugsteuerung."""
 COL_Fahrzeugsteuerung = [  # Col Fahrzeugsteuerung
     dbc.Row(
         [  # Titel
@@ -413,11 +431,24 @@ COL_Fahrzeugsteuerung = [  # Col Fahrzeugsteuerung
             dbc.Col(
                 [
                     dbc.Button(
-                        children="Start",
+                        children="START",
                         id="btn_start",
                         color="dark",
-                        className="me-1",
                         n_clicks=0,
+                    )
+                ],
+                width=4,
+            ),
+            dbc.Col(
+                [   
+                    html.Div(
+                        dbc.Button(
+                            [dbc.Spinner(size="sm"), " Driving..."],
+                            color="dark",
+                            disabled=True,
+                        ),
+                        id="spinner",
+                        style={'display':'none'},
                     )
                 ],
                 width=4,
@@ -428,7 +459,6 @@ COL_Fahrzeugsteuerung = [  # Col Fahrzeugsteuerung
                         children="STOP",
                         id="btn_stop",
                         color="dark",
-                        className="me-1",
                         n_clicks=0,
                     )
                 ],
@@ -444,6 +474,8 @@ COL_Fahrzeugsteuerung = [  # Col Fahrzeugsteuerung
         ]
     ),
 ]
+
+"""Spalte der Kamera-View."""
 COL_Kamera = [  # Col Kamera
     dbc.Row(
             [  # Titel
@@ -464,6 +496,7 @@ COL_Kamera = [  # Col Kamera
         ),
 ]
 
+"""App-Layout fuer die Dash-Anwendung."""
 app.layout = dbc.Container(
     [
         dbc.Row(
@@ -520,32 +553,24 @@ app.layout = dbc.Container(
     [Input("collapse-button-pre", "n_clicks")],
     [State("collapse-pre", "is_open")],
 )
-def toggle_collapse_pre(n, is_open):
-    """XXX"""
-    if n:
-        return not is_open
-    return is_open
-
-
 @app.callback(
     Output("collapse-canny", "is_open"),
     [Input("collapse-button-canny", "n_clicks")],
     [State("collapse-canny", "is_open")],
 )
-def toggle_collapse_canny(n, is_open):
-    """XXX"""
-    if n:
-        return not is_open
-    return is_open
-
-
 @app.callback(
     Output("collapse-houghes", "is_open"),
     [Input("collapse-button-houghes", "n_clicks")],
     [State("collapse-houghes", "is_open")],
 )
-def toggle_collapse_houghes(n, is_open):
-    """XXX"""
+def toggle_collapse(n, is_open):
+    """Steuert die Collapse-Widgets. 
+    
+    Collapse-Widgets:
+        Pre-Processing
+        Canny
+        Houghes
+    """
     if n:
         return not is_open
     return is_open
@@ -561,7 +586,8 @@ def toggle_collapse_houghes(n, is_open):
 def joystick_values(angle, force, switch, max_Speed):
     """Steuerung über Joystick
         berechnet anhand der Joystick-Werte den Lenkeinschlag
-        und zusätzlich mit der eingestellten Maximalgeschwindigkeit die Fahrgeschwindigkeit
+        und mit der eingestellten Maximalgeschwindigkeit
+        die Fahrgeschwindigkeit.
 
     Args:
         angle (float): Winkelwert des Joysticks
@@ -606,7 +632,7 @@ def joystick_values(angle, force, switch, max_Speed):
 
 
 def computeKPI(data):
-    """Berechnung der Kenndaten des Log-Files
+    """Berechnung der Kenndaten des Log-Files.
 
     Args:
         data (pandas.DataFrame): Log-Daten als DataFrame
@@ -631,7 +657,7 @@ def computeKPI(data):
     Input("dd_Logfiles", "value"),
 )
 def update_KPI_DD(logFile):
-    """Aktualisieren der Kennwerte nach auswahl eines neuen Files
+    """Aktualisieren der Kennwerte nach auswahl eines neuen Files.
 
     Args:
         logFile (str): nur wegen input nötig
@@ -654,7 +680,7 @@ def update_KPI_DD(logFile):
     Input("dd_LogDetails", "value"),
 )
 def selectedLog(logFile, logDetails):
-    """Auswahl des Logfiles
+    """Auswahl des Logfiles.
 
     Args:
         logFile (str): Log-File
@@ -683,8 +709,25 @@ def selectedLog(logFile, logDetails):
     Input("intervall_10s", "n_intervals"),
 )
 def updateFileList(value):
-    """alle 10 Sekunden den Logger-Ordner auf neue Files prüfen"""
+    """Alle 10 Sekunden den Logger-Ordner auf neue Files prüfen."""
     return getLoggerFiles()
+
+
+@app.callback(
+    Output("spinner", "style"),
+    Input("btn_start", "n_clicks"),
+    Input("btn_stop", "n_clicks"),
+)
+def spinner_action(btn_start, btn_stop):
+    """Steuert den Spinner anhand der Start und Stop Buttons."""
+    changed_id = [p["prop_id"] for p in callback_context.triggered][0]
+
+    if "btn_start" in changed_id:
+        spinner_style = {'display':'block'}
+    if "btn_stop" in changed_id:
+        spinner_style = {'display':'none'}
+
+    return spinner_style
 
 
 @app.callback(
@@ -695,7 +738,7 @@ def updateFileList(value):
     State("slider_speed", "value"),
 )
 def button_action(btn_start, btn_stop, fp, speed):
-    """Buttons "Start" und "Stop" verarbeiten
+    """Buttons "Start" und "Stop" verarbeiten.
 
     Returns:
         int: Schalter für manuellen Betrieb auf 0 setzen
@@ -711,14 +754,11 @@ def button_action(btn_start, btn_stop, fp, speed):
 
     if "btn_stop" in changed_id:
         car._active = False
-        time.sleep(1)
 
     return 0
 
 
 @app.callback(
-    Output('switch_canny', 'label'),
-    Output('switch_houghes', 'label'),
     Output('output-container-scale-slider', 'children'),
     Output('output-container-blur-slider', 'children'),
     Output('output-container-dilation-slider', 'children'),
@@ -727,8 +767,6 @@ def button_action(btn_start, btn_stop, fp, speed):
     Output('output-container-houghes_threshold', 'children'),
     Output('output-container-houghes_minLineLength', 'children'),
     Output('output-container-houghes_maxLineGap', 'children'),
-    Input('switch_canny', 'value'),
-    Input('switch_houghes', 'value'),
     Input("slider_scale", "value"),
     Input("slider_blur", "value"),
     Input("slider_dilation", "value"),
@@ -738,17 +776,8 @@ def button_action(btn_start, btn_stop, fp, speed):
     Input("slider_houghes_minLineLength", "value"),
     Input("slider_houghes_maxLineGap", "value"),
 )
-def slider_action(sw_canny, sw_houghes, scale, blur, dilation, canny_lower, canny_upper, houghes_threshold, houghes_minLineLength, houghes_maxLineGap):
-    """XXX"""
-    if sw_canny:
-        car._canny_frame = True
-    else:
-        car._canny_frame = False
-
-    if sw_houghes:
-        car._houghLP_frame = True
-    else:
-        car._houghLP_frame = False
+def slider_action(scale, blur, dilation, canny_lower, canny_upper, houghes_threshold, houghes_minLineLength, houghes_maxLineGap):
+    """Anpassung der Werte aus dem Parameter Tuning im Car-Objekt."""
 
     car._frame_scale = 1/scale
     car._frame_blur = blur
@@ -759,8 +788,32 @@ def slider_action(sw_canny, sw_houghes, scale, blur, dilation, canny_lower, cann
     car._houghes_minLineLength = houghes_minLineLength
     car._houghes_maxLineGap = houghes_maxLineGap
 
-    return 'Canny Edge Detection: "{}"'.format(sw_canny), 'Houghes Lines: "{}"'.format(sw_houghes), 'Frame-Scale: "{}"'.format(scale), 'Gaussian-Blur Repitions: "{}"'.format(blur), 'Dilation-Kernel-Size: "{}"'.format(dilation), 'Canny-Lower: "{}"'.format(canny_lower), 'Canny-Upper: "{}"'.format(canny_upper), 'Houghes-Threshold: "{}"'.format(houghes_threshold), 'Houghes-minLineLength: "{}"'.format(houghes_minLineLength), 'Houghes-maxLineGap: "{}"'.format(houghes_maxLineGap)
+    return 'Frame-Scale: "{}"'.format(scale),\
+            'Gaussian-Blur Repitions: "{}"'.format(blur),\
+            'Dilation-Kernel-Size: "{}"'.format(dilation),\
+            'Canny-Lower: "{}"'.format(canny_lower),\
+            'Canny-Upper: "{}"'.format(canny_upper),\
+            'Houghes-Threshold: "{}"'.format(houghes_threshold),\
+            'Houghes-minLineLength: "{}"'.format(houghes_minLineLength),\
+            'Houghes-maxLineGap: "{}"'.format(houghes_maxLineGap)
+
+
+@app.callback(
+    Output('switch_canny', 'label'),
+    Output('switch_houghes', 'label'),
+    Input('switch_canny', 'value'),
+    Input('switch_houghes', 'value'),
+)
+def switch_action(sw_canny, sw_houghes):
+    """Anzeige des Canny und oder Houges Frames zum Original Kamerabild."""
+
+    car._canny_frame = True if sw_canny else False
+    car._houghLP_frame = True if sw_houghes else False
+
+    return f'Canny Edge Detection: {sw_canny}',\
+            f'Houghes Lines: {sw_houghes}'
 
 
 if __name__ == "__main__":
+    """Main-Programm der Dashboard App"""
     app.run_server(debug=False, host=get_ip_address())
