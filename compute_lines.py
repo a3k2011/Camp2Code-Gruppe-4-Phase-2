@@ -80,9 +80,9 @@ def average_lines(lines, image):
     for line in lines:
         line_f = (line_params_from_coords(line[0]))
         if line_f[0] != np.infty:
-            if (line_f[0]<0) and (line_f[0]> -3):
+            if (line_f[0]<0) and (line_f[0]> -1.5):
                 lines_l.append(line_f)
-            elif (line_f[0]>0) and (line_f[0]<3):
+            elif (line_f[0]>0) and (line_f[0]<1.5):
                 lines_r.append(line_f)
     ll_av = np.average(lines_l, axis=0)
     lr_av = np.average(lines_r, axis=0)
@@ -98,7 +98,8 @@ def average_lines(lines, image):
     xl, yl, _,_ = line_l
     xr, _, _,_ = line_r
     
-    p_middle = (xl+(xr-xl)//2,yl)
+    #p_middle = (xl+(xr-xl)//2,yl)
+    p_middle = (width//2,height)
     p_intercept = intercept_point(ll_av, lr_av)
     line_middle = [p_middle[0], p_middle[1],p_intercept[0], p_intercept[1]]
     
@@ -213,7 +214,7 @@ def main():
         canny_frame =cv.Canny(blur_frame,180,220)
         
         #Hier kommt der Call der zu testenden Funktion
-        image, angle = get_lines(canny_frame, threshold=20, minLineLength=40, maxLineGap=20)
+        image, angle = get_lines(canny_frame, threshold=20, minLineLength=80, maxLineGap=50)
         
         txt_angle = f"LW: {angle:.2f}"
         cv.putText(image,
