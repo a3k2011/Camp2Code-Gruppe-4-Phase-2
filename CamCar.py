@@ -98,10 +98,23 @@ class CamCar(basecar.BaseCar):
         self.steering_angle = 90
 
         self.drive(v)
-        time.sleep(1)
+        while self._active:
 
-        self._active = False
+            raw_frame = self.cam.get_frame()
+            fixed_scale = self._frame_scale
+
+            canny_frame = pf.preprocess_frame(raw_frame, fixed_scale, self._canny_lower, self._canny_upper)
+            houghes_frame, line_angle = cl.get_lines(canny_frame, self._houghes_threshold, self._houghes_minLineLength, self._houghes_maxLineGap)
+
+            steering_angle = st.steering_angle(line_angle)
+            if steering_angle != 360:
+                self.steering_angle = steering_angle
+
+            self._lineframe = self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
+            time.sleep(0.1)
+            
         self.stop()
+        self.steering_angle = 90
 
     def fp_deepnn(self, v):
         """Funktion zur Ausfuerung des Fahrparcours auf Basis DeepNN"""
@@ -113,6 +126,7 @@ class CamCar(basecar.BaseCar):
 
         self._active = False
         self.stop()
+        self.steering_angle = 90
             
 
 if __name__ == "__main__":
