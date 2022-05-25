@@ -179,7 +179,7 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
                     fontScale=0.8,
                     color=(0,0,255),
                     thickness=1)
-            return image, 90
+            return image, angle_invalid
     else:
         image = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
         cv.putText(image,
@@ -189,7 +189,7 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
                     fontScale=0.8,
                     color=(0,255,0),
                     thickness=1)
-        return image, 90
+        return image, angle_invalid
         
 def main():
     """
