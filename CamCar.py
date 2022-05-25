@@ -70,7 +70,7 @@ class CamCar(basecar.BaseCar):
             canny_frame = pf.preprocess_frame(raw_frame, fixed_scale, self._canny_lower, self._canny_upper)
 
             try:
-                houghes_frame, pl, pr, pm = cl.get_lines(canny_frame, self._houghes_threshold, self._houghes_minLineLength, self._houghes_maxLineGap)
+                houghes_frame, angle = cl.get_lines(canny_frame, self._houghes_threshold, self._houghes_minLineLength, self._houghes_maxLineGap)
             except:
                 houghes_frame = np.copy(cv.cvtColor(canny_frame, cv.COLOR_GRAY2RGB))
 
