@@ -338,20 +338,6 @@ COL_Fahrzeugsteuerung = [  # Col Fahrzeugsteuerung
                 width=4,
             ),
             dbc.Col(
-                [   
-                    html.Div([
-                        dbc.Button(
-                        [dbc.Spinner(size="sm"), " Driving..."],
-                        color="primary",
-                        disabled=True,
-                        )],
-                        id='spinner_drive',
-                        style={'display':'none'},
-                    )
-                ],
-                width=4,
-            ),
-            dbc.Col(
                 [
                     dbc.Button(
                         children="STOP",
@@ -582,7 +568,6 @@ def updateFileList(value):
 
 @app.callback(
     Output("sw_manual", "value"),
-    Output('spinner_drive', 'style'),
     Input("btn_start", "n_clicks"),
     Input("btn_stop", "n_clicks"),
     State("dd_Fahrprogramm", "value"),
@@ -596,7 +581,6 @@ def button_action(btn_start, btn_stop, fp, speed):
     """
     changed_id = [p["prop_id"] for p in callback_context.triggered][0]
     if "btn_start" in changed_id:
-        #spinner_drive = {'display': 'block'}
         if fp == 1:
             car.parameter_tuning()
         elif fp == 2:
@@ -605,11 +589,10 @@ def button_action(btn_start, btn_stop, fp, speed):
             car.fp_deepnn(speed)
 
     if "btn_stop" in changed_id:
-        #spinner_drive = {'display': 'none'}
         car._active = False
         time.sleep(1)
 
-    return 0, spinner_drive
+    return 0
 
 
 @app.callback(

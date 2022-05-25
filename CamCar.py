@@ -56,6 +56,19 @@ class CamCar(basecar.BaseCar):
                 b'Content-Type: image/jpeg\r\n\r\n' + jepg + b'\r\n\r\n')
             time.sleep(0.1)
 
+    def build_dash_cam_view(self, frame_scale, raw_frame, canny_frame, houghes_frame):
+        """XXX"""
+        result_frame = pf.resize_frame(raw_frame, frame_scale)
+
+        if self._canny_frame:
+            canny_rgb_frame = cv.cvtColor(canny_frame, cv.COLOR_GRAY2RGB)
+            result_frame = np.concatenate([result_frame, canny_rgb_frame], axis=0)
+
+        if self._houghLP_frame:
+            result_frame = np.concatenate([result_frame, houghes_frame], axis=0)
+
+        return result_frame
+
     def parameter_tuning(self):
         """Funktion zur Ausfuerung des Parameter-Tunings."""
         self._active = True
@@ -63,31 +76,17 @@ class CamCar(basecar.BaseCar):
 
         while self._active:
 
+            raw_frame = self.cam.get_frame()
             fixed_scale = self._frame_scale
 
-            raw_frame = self.cam.get_frame()
-            scl_frame = pf.resize_frame(raw_frame, fixed_scale)
-            result_frame = np.copy(scl_frame)
-
             canny_frame = pf.preprocess_frame(raw_frame, fixed_scale, self._canny_lower, self._canny_upper)
+            houghes_frame, line_angle = cl.get_lines(canny_frame, self._houghes_threshold, self._houghes_minLineLength, self._houghes_maxLineGap)
 
-            try:
-                houghes_frame, angle = cl.get_lines(canny_frame, self._houghes_threshold, self._houghes_minLineLength, self._houghes_maxLineGap)
-            except:
-                houghes_frame = np.copy(cv.cvtColor(canny_frame, cv.COLOR_GRAY2RGB))
+            steering_angle = st.steering_angle(line_angle)
+            if steering_angle != 360:
+                self.steering_angle = steering_angle
 
-            if angle != 360:
-                self.steering_angle = st.steering_angle(angle)
-
-            if self._canny_frame:
-                canny_rgb_frame = cv.cvtColor(canny_frame, cv.COLOR_GRAY2RGB)
-                result_frame = np.concatenate([result_frame, canny_rgb_frame], axis=0)
-
-            if self._houghLP_frame:
-                result_frame = np.concatenate([result_frame, houghes_frame], axis=0)
-
-            self._lineframe = result_frame
-
+            self._lineframe = self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
             time.sleep(0.1)
 
         self._lineframe = None
