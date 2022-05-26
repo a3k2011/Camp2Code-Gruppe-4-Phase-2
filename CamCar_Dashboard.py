@@ -14,6 +14,16 @@ import CamCar as CC
 df = None
 car = CC.CamCar()
 
+car_scale = 1/car._frame_scale
+car_blur = car._frame_blur
+car_dilation = car._frame_dilation
+car_canny_lower = car._canny_lower
+car_canny_upper = car._canny_upper
+car_houghes_threshold = car._houghes_threshold
+car_houghes_minLineLength = car._houghes_minLineLength
+car_houghes_maxLineGap = car._houghes_maxLineGap
+
+
 """Initialisiere Flask-Server und Dash-APP."""
 server = Flask(__name__)
 app = dash.Dash(
@@ -190,11 +200,23 @@ COL_Headline = [  # Col Headline
 COL_Tuning = [  # Col Tuning
     dbc.Col(
         [   
-            html.H2(
-                id="titel_Parameter_Tuning",
-                children="Parameter Tuning",
-                style={"textAlign": "left"},
-            ),
+            dbc.Row([
+                dbc.Col([
+                    html.H2(
+                    id="titel_Parameter_Tuning",
+                    children="Parameter Tuning",
+                    style={"textAlign": "left"},
+                    ),
+                ],width=4),
+                dbc.Col([
+                    dbc.Button(
+                            children="save params",
+                            id="btn_save_params",
+                            color="dark",
+                            n_clicks=0,
+                        ),
+                ],width=2),
+            ]),
             dbc.Switch(id="switch_canny",
                         label=""
                         ),
@@ -217,7 +239,7 @@ COL_Tuning = [  # Col Tuning
                             max=5,
                             step=1,
                             id="slider_scale",
-                            value=1,
+                            value=car_scale,
                             updatemode="drag",
                             ),
                             html.Div(id='output-container-blur-slider'),
@@ -226,7 +248,7 @@ COL_Tuning = [  # Col Tuning
                             max=5,
                             step=1,
                             id="slider_blur",
-                            value=1,
+                            value=car_blur,
                             updatemode="drag",
                             ),
                             html.Div(id='output-container-dilation-slider'),
@@ -235,7 +257,7 @@ COL_Tuning = [  # Col Tuning
                             max=5,
                             step=1,
                             id="slider_dilation",
-                            value=2,
+                            value=car_dilation,
                             updatemode="drag",
                             ),
                         ],
@@ -264,7 +286,7 @@ COL_Tuning = [  # Col Tuning
                                 max=255,
                                 step=5,
                                 id="slider_canny_lower",
-                                value=50,
+                                value=car_canny_lower,
                                 updatemode="drag",
                             ),
                             html.Div(id='output-container-canny-upper-slider'),
@@ -273,7 +295,7 @@ COL_Tuning = [  # Col Tuning
                                 max=255,
                                 step=5,
                                 id="slider_canny_upper",
-                                value=125,
+                                value=car_canny_upper,
                                 updatemode="drag",
                             ),
                         ],
@@ -302,7 +324,7 @@ COL_Tuning = [  # Col Tuning
                                 max=100,
                                 step=2,
                                 id="slider_houghes_threshold",
-                                value=40,
+                                value=car_houghes_threshold,
                                 updatemode="drag",
                             ),
                             html.Div(id='output-container-houghes_minLineLength'),
@@ -311,7 +333,7 @@ COL_Tuning = [  # Col Tuning
                                 max=140,
                                 step=2,
                                 id="slider_houghes_minLineLength",
-                                value=70,
+                                value=car_houghes_minLineLength,
                                 updatemode="drag",
                             ),
                             html.Div(id='output-container-houghes_maxLineGap'),
@@ -320,7 +342,7 @@ COL_Tuning = [  # Col Tuning
                                 max=100,
                                 step=2,
                                 id="slider_houghes_maxLineGap",
-                                value=30,
+                                value=car_houghes_maxLineGap,
                                 updatemode="drag",
                             ),
                         ],
@@ -392,7 +414,7 @@ COL_Plot = [  # Col Plot
                         ),
                         html.Div(id="dummy"),
                         html.Div(id="dummy2"),
-                        dcc.Interval(id="intervall_10s", interval=10000),
+                        dcc.Interval(id="interval_10s", interval=10000),
                         dcc.Interval(
                             id="interval_startup",
                             max_intervals=1,
@@ -492,6 +514,8 @@ COL_Kamera = [  # Col Kamera
     dbc.Row(
             [  # Kamerabild
                 html.Img(src="/video_feed")
+                
+                
             ]
         ),
 ]
@@ -553,17 +577,41 @@ app.layout = dbc.Container(
     [Input("collapse-button-pre", "n_clicks")],
     [State("collapse-pre", "is_open")],
 )
+def toggle_collapse_pre(n, is_open):
+    """Steuert die Collapse-Widgets. 
+    
+    Collapse-Widgets:
+        Pre-Processing
+        Canny
+        Houghes
+    """
+    if n:
+        return not is_open
+    return is_open
+
 @app.callback(
     Output("collapse-canny", "is_open"),
     [Input("collapse-button-canny", "n_clicks")],
     [State("collapse-canny", "is_open")],
 )
+def toggle_collapse_canny(n, is_open):
+    """Steuert die Collapse-Widgets. 
+    
+    Collapse-Widgets:
+        Pre-Processing
+        Canny
+        Houghes
+    """
+    if n:
+        return not is_open
+    return is_open
+
 @app.callback(
     Output("collapse-houghes", "is_open"),
     [Input("collapse-button-houghes", "n_clicks")],
     [State("collapse-houghes", "is_open")],
 )
-def toggle_collapse(n, is_open):
+def toggle_collapse_houghes(n, is_open):
     """Steuert die Collapse-Widgets. 
     
     Collapse-Widgets:
@@ -706,7 +754,7 @@ def selectedLog(logFile, logDetails):
 
 @app.callback(
     Output("dd_Logfiles", "options"),
-    Input("intervall_10s", "n_intervals"),
+    Input("interval_10s", "n_intervals"),
 )
 def updateFileList(value):
     """Alle 10 Sekunden den Logger-Ordner auf neue Files prüfen."""
@@ -721,7 +769,7 @@ def updateFileList(value):
 def spinner_action(btn_start, btn_stop):
     """Steuert den Spinner anhand der Start und Stop Buttons."""
     changed_id = [p["prop_id"] for p in callback_context.triggered][0]
-
+    spinner_style = {'display':'none'}
     if "btn_start" in changed_id:
         spinner_style = {'display':'block'}
     if "btn_stop" in changed_id:
@@ -734,10 +782,11 @@ def spinner_action(btn_start, btn_stop):
     Output("sw_manual", "value"),
     Input("btn_start", "n_clicks"),
     Input("btn_stop", "n_clicks"),
+    Input("btn_save_params", "n_clicks"),
     State("dd_Fahrprogramm", "value"),
     State("slider_speed", "value"),
 )
-def button_action(btn_start, btn_stop, fp, speed):
+def button_action(btn_start, btn_stop, btn_save_params, fp, speed):
     """Buttons "Start" und "Stop" verarbeiten.
 
     Returns:
@@ -754,6 +803,9 @@ def button_action(btn_start, btn_stop, fp, speed):
 
     if "btn_stop" in changed_id:
         car._active = False
+        
+    if "btn_save_params" in changed_id:
+        car.save_params()
 
     return 0
 
@@ -775,10 +827,10 @@ def button_action(btn_start, btn_stop, fp, speed):
     Input("slider_houghes_threshold", "value"),
     Input("slider_houghes_minLineLength", "value"),
     Input("slider_houghes_maxLineGap", "value"),
+    Input("interval_startup", "n_intervals"),
 )
-def slider_action(scale, blur, dilation, canny_lower, canny_upper, houghes_threshold, houghes_minLineLength, houghes_maxLineGap):
+def slider_action(scale, blur, dilation, canny_lower, canny_upper, houghes_threshold, houghes_minLineLength, houghes_maxLineGap, interval_startup):
     """Anpassung der Werte aus dem Parameter Tuning im Car-Objekt."""
-
     car._frame_scale = 1/scale
     car._frame_blur = blur
     car._frame_dilation = dilation

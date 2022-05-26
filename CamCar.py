@@ -21,21 +21,34 @@ class CamCar(basecar.BaseCar):
         """Initialisierung der Klasse CamCar."""
 
         super().__init__()
+        #print("Init CamCar")
         self.cam = basisklassen_cam.Camera()
         self._dl = datenlogger.Datenlogger(log_file_path="Logger")
         self._active = False
         self._lineframe = None
-        self._frame_scale = 1
-        self._frame_blur = 1
-        self._frame_dilation = 2
-        self._canny_frame = False
-        self._canny_lower = 50
-        self._canny_upper = 125
-        self._houghLP_frame = False
-        self._houghes_threshold = 40
-        self._houghes_minLineLength = 70
-        self._houghes_maxLineGap = 30
+        try: # Parameter aus config.json laden
+            with open("config.json", "rt")as f:
+                params = json.load(f)
+                self._frame_scale = params["scale"]
+                self._frame_blur = params["blur"]
+                self._frame_dilation = params["dilation"]
+                self._canny_lower = params["canny lower"]
+                self._canny_upper = params["canny upper"]
+                self._houghes_threshold = params["hough threshold"]
+                self._houghes_minLineLength = params["hough min line length"]
+                self._houghes_maxLineGap = params["hough max line gap"]
+        except: #Datein nicht vorhanden oder Werte nicht enthalten
+            self._frame_scale = 1
+            self._frame_blur = 1
+            self._frame_dilation = 2
+            self._canny_lower = 50
+            self._canny_upper = 125
+            self._houghes_threshold = 40
+            self._houghes_minLineLength = 70
+            self._houghes_maxLineGap = 30
 
+        self._canny_frame = False
+        self._houghLP_frame = False
     @property
     def drive_data(self):
         """Ausgabe der Fahrdaten fuer den Datenlogger.
@@ -45,6 +58,26 @@ class CamCar(basecar.BaseCar):
         """
         return [self.speed, self.direction, self.steering_angle]
 
+    def save_params(self):
+        data = None
+        try:
+            with open("config.json", "r") as f:
+                data = json.load(f)
+            with open("config.json", "w") as f:
+                data["scale"] = self._frame_scale
+                data["blur"] = self._frame_blur
+                data["dilation"] = self._frame_dilation
+                data["canny lower"] = self._canny_lower
+                data["canny upper"] = self._canny_upper
+                data["hough threshold"] = self._houghes_threshold
+                data["hough min line length"] = self._houghes_minLineLength
+                data["hough max line gap"] = self._houghes_maxLineGap
+                json.dump(data, f, indent="    ")
+                #print("Parameters saved to config.json")
+        except:
+            print("config.json File Error")
+            
+    
     def get_image_bytes(self):
         """Generator for the images from the camera for the live view in dash
 
@@ -92,7 +125,7 @@ class CamCar(basecar.BaseCar):
 
             self._lineframe = self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
 
-            print(time.perf_counter()-start)
+            #print(time.perf_counter()-start)
 
         self._lineframe = None
         self.stop()
