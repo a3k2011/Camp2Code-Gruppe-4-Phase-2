@@ -78,13 +78,21 @@ def average_lines(lines, image):
     height, width, _ = image.shape
     lines_l = []
     lines_r = []
+    limes_l = width *0.7
+    limes_r = width *0.3
     for line in lines:
+        x1, y1, x2, y2 = line[0]
         line_f = (line_params_from_coords(line[0]))
         if line_f[0] != np.infty:
             if (line_f[0]< -1): # Steigung 1 (oder -1) entspricht 45 Grad -> horizontale Linien werden ausgeblendet
-                lines_l.append(line_f)
+                if x1 < limes_l and x2 < limes_l:# durch den Limes werden Linien herausgefiltert die nach rechts zeigen aber am rechten Bildrand liegen
+                    lines_l.append(line_f) 
+                    # einzeichnen der selektierten Linien
+                    image = cv.line(image, (x1, y1),(x2, y2), (255,0,255),3)
             elif (line_f[0]>1):
-                lines_r.append(line_f)
+                if x1 > limes_r and x2 > limes_r: # hier entsprechend Linien die nach links zeigen und am linken Bildrand sind
+                    lines_r.append(line_f)
+                    image = cv.line(image, (x1, y1),(x2, y2), (0,0,255),3)
     ll_av = np.average(lines_l, axis=0)
     lr_av = np.average(lines_r, axis=0)
     if len(lines_l)>0 and len(lines_r)>0:        
@@ -150,10 +158,12 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
     if lines is not None:
         text_lines = str(len(lines))+" lines found"
         frame_marked = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
+        """
         for line in lines:
             x1, y1, x2, y2 = line[0]
             # einzeichnen der von Hough gefundenen Linien
             frame_marked = cv.line(frame_marked, (x1, y1),(x2, y2), (0,0,255),3)
+            """
         cv.putText(frame_marked,
                     text_lines, 
                     org=(10,20),
