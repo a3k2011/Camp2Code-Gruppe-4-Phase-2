@@ -84,12 +84,12 @@ def average_lines(lines, image):
         x1, y1, x2, y2 = line[0]
         line_f = (line_params_from_coords(line[0]))
         if line_f[0] != np.infty:
-            if (line_f[0]< -1): # Steigung 1 (oder -1) entspricht 45 Grad -> horizontale Linien werden ausgeblendet
+            if (line_f[0]< -0.5): # Steigung 1 (oder -1) entspricht 45 Grad -> horizontale Linien werden ausgeblendet
                 if x1 < limes_l and x2 < limes_l:# durch den Limes werden Linien herausgefiltert die nach rechts zeigen aber am rechten Bildrand liegen
                     lines_l.append(line_f) 
                     # einzeichnen der selektierten Linien
                     image = cv.line(image, (x1, y1),(x2, y2), (255,0,255),3)
-            elif (line_f[0]>1):
+            elif (line_f[0]>0.5):
                 if x1 > limes_r and x2 > limes_r: # hier entsprechend Linien die nach links zeigen und am linken Bildrand sind
                     lines_r.append(line_f)
                     image = cv.line(image, (x1, y1),(x2, y2), (0,0,255),3)
