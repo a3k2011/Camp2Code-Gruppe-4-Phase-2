@@ -8,6 +8,7 @@ import datenlogger
 import preprocess_frame as pf
 import compute_lines as cl
 import steering as st
+from datetime import datetime
 
 
 class CamCar(basecar.BaseCar):
@@ -114,6 +115,9 @@ class CamCar(basecar.BaseCar):
         """Funktion zur Ausfuerung des Parameter-Tunings."""
         self._active = True
         self.steering_angle = 90
+        now = str(datetime.now())
+        self._folder = now.replace("-", "").replace(":", "").replace(" ", "_")[:15]
+        os.mkdir(self._folder)
 
         while self._active:
             
@@ -145,6 +149,9 @@ class CamCar(basecar.BaseCar):
         """Funktion zur Ausfuerung des Fahrparcours auf Basis OpenCV"""
         self._active = True
         self.steering_angle = 90
+        now = str(datetime.now())
+        self._folder = now.replace("-", "").replace(":", "").replace(" ", "_")[:15]
+        os.mkdir(self._folder)
 
         self.drive(v)
         while self._active:
