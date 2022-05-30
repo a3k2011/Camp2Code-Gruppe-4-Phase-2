@@ -3,14 +3,19 @@ import numpy as np
 import basisklassen_cam
 
 def resize_frame(frame, resize_faktor):
-    """XXX"""
+    """Funktion zur Anpassung der Bildgroesse.
+    
+    Args:
+        [resize_faktor]: Faktor zur Anpassung des Bildes
+    """
     if resize_faktor != 1:
         height, width, _ = frame.shape
         frame = cv.resize(frame, (int(width*resize_faktor), int(height*resize_faktor)), interpolation = cv.INTER_CUBIC)
     return frame
 
 def crop_roi(frame):
-    """XXX"""
+    """Funktion zur Bildung der Region of Interest.
+    """
     height = frame.shape[0]
     lower_border = int(height*0.40)
     upper_border = int(height*0.85)
@@ -19,33 +24,49 @@ def crop_roi(frame):
     return frame
 
 def blur_image(frame, repetitions_blur):
-    """XXX"""
+    """Funktion zum Weichzeichnen des Bildes.
+
+    Args:
+        [repetitions_blur]: Faktor zur Anpassung des Bildes
+    """
     for i in range(repetitions_blur):
         frame = cv.GaussianBlur(frame, (3,3), 1)
     return frame
 
 def change_color_bgr2gray(frame):
-    """XXX"""
+    """Funktion zur Anpassung des Farbraums.
+    """
     frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     return frame
 
 def edge_detection(frame, low_border, upper_border):
-    """XXX"""
+    """Funktion zur Anwendung der Canny Edge Detection.
+
+    Args:
+        [low_border]: Untere Grenze der Canny Edge Detection
+        [upper_border]: Obere Grenze der Canny Edge Detection
+    """
     frame = cv.Canny(frame, low_border, upper_border)
     return frame
 
 def dilate_image(frame, kernel_size):
-    """XXX"""
+    """Funktion zur Anpassung der Strichstaerke.
+
+    Args:
+        [kernel_size]: Groesse der kernel size
+    """
     frame = cv.dilate(frame, np.ones((kernel_size, kernel_size), np.uint8), iterations=1)
     return frame
 
 def binary_threshold(frame):
-    """XXX"""
+    """Funktion zur Anpassung der Farbwerte. (Filter: Nur 0 oder 255)
+    """
     th, frame = cv.threshold(frame, 0, 255, cv.THRESH_BINARY)
     return frame
 
 def preprocess_frame(raw_frame, resize_faktor=1, repetitions_blur=1, kernel_size=3, canny_lower=50, canny_upper= 125):
-    """XXX"""
+    """Funktionen fuer das Preprocessing fuer das OpenCV CamCar.
+    """
     frame = np.copy(raw_frame)
     frame = resize_frame(frame, resize_faktor=resize_faktor)
     roi = crop_roi(frame)
@@ -57,8 +78,19 @@ def preprocess_frame(raw_frame, resize_faktor=1, repetitions_blur=1, kernel_size
 
     return frame, roi
 
+def preprocess_frame_cnn(raw_frame, resize_faktor=1):
+    """Funktion fuer das Preprocessing fuer das DeepNN CamCar.
+    """
+    frame = np.copy(raw_frame)
+    frame = resize_frame(frame, resize_faktor=resize_faktor)
+    roi = crop_roi(frame)
+    img = roi/255
+    img = img.reshape(1, img.shape[0], img.shape[1], img.shape[2])
+
+    return roi, img
+
 if __name__ == "__main__":
-    """XXX"""
+    """Main-Programm: Testfunktionen"""
     cam = basisklassen_cam.Camera()
     testbild = cam.get_frame()
     print(testbild.shape)
@@ -66,8 +98,6 @@ if __name__ == "__main__":
     cv.imshow("Originalbild", testbild)
     cv.imshow("Blurred Image", blur_image(testbild))
     cv.imshow("Preprocessed Image", preprocess_frame(testbild))
-    # cv.imshow("Preprocessed Image Dilate", dilate_image(preprocess_frame(testbild)))
-    # cv.imshow("Preprocessed Image Dilate THRES", binary_threshold(dilate_image(preprocess_frame(testbild))))
 
     cv.waitKey(0)
     cv.destroyAllWindows()

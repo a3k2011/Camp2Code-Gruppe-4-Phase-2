@@ -10,6 +10,7 @@ import preprocess_frame as pf
 import compute_lines as cl
 import steering as st
 import uuid
+import tensorflow as tf
 
 
 class CamCar(basecar.BaseCar):
@@ -31,6 +32,7 @@ class CamCar(basecar.BaseCar):
         self._houghLP_frame = False
         self._folder = ""
         self._create_img_logger_path()
+        self._cnn_model = tf.keras.models.load_model('cnn_camcar_model.h5')
 
         try: # Parameter aus config.json laden.
             with open("config.json", "rt")as f:
@@ -164,7 +166,7 @@ class CamCar(basecar.BaseCar):
 
         while self._active:
 
-            start = time.perf_counter()
+            # start = time.perf_counter()
 
             raw_frame = self.cam.get_frame()
             fixed_scale = self._frame_scale
@@ -179,7 +181,7 @@ class CamCar(basecar.BaseCar):
             self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
             self.save_img(roi, steering_angle)
 
-            #print(time.perf_counter()-start)
+            # print(time.perf_counter()-start)
             
         self._end_drive_mode
 
@@ -188,11 +190,22 @@ class CamCar(basecar.BaseCar):
         """
         self._start_drive_mode(v)
 
-        time.sleep(1)
-        self._active = False
+        while self._active:
+
+            # start = time.perf_counter()
+
+            raw_frame = self.cam.get_frame()
+            fixed_scale = self._frame_scale
+
+            roi, img = pf.preprocess_frame_cnn(raw_frame, fixed_scale)
+
+            y_pred = self._cnn_model.predict(img)
+            steering_angle = st.steering_angle_deepnn(y_pred)
+            if steering_angle != 360:
+                self.steering_angle = steering_angle
+
+            self._result_frame = roi
+
+            # print(time.perf_counter()-start)
 
         self._end_drive_mode
-    
-
-if __name__ == "__main__":
-    car = CamCar()

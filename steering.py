@@ -5,14 +5,27 @@ import compute_lines as cl
 import cv2 as cv
 
 def steering_angle(line_angle):
-    """
-    Umrechung Lenkwinkel
-    line_angle liegt zw. 45 und 135
-    line_angle = 360 ist ungültig
-    """
+    """Umrechung des Lenkwinkels anhand HoughesLineP Line Angle.
 
+    Returns:
+            [int]: Lenkwinkel
+    """
     if line_angle != 360: 
         steering_angle_car = round(line_angle, 1)
+        return steering_angle_car
+    else:
+        return 360
+
+def steering_angle_deepnn(y_pred):
+    """Umrechung des Lenkwinkels anhand CNN y_pred.
+
+    Returns:
+            [int]: Lenkwinkel
+    """
+    steering_angle_car = round(y_pred[0][0], 1)
+    # print('Predicted Steering Angle:', steering_angle_car)
+
+    if steering_angle_car >= 50 and steering_angle_car <= 130:
         return steering_angle_car
     else:
         return 360
