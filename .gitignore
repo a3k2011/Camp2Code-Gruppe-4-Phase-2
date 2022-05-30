@@ -1,4 +1,5 @@
 *.json
+*.h5
 Logger/
 IMG_Logger/
 __pycache__/
