@@ -48,14 +48,14 @@ def preprocess_frame(raw_frame, resize_faktor=1, repetitions_blur=1, kernel_size
     """XXX"""
     frame = np.copy(raw_frame)
     frame = resize_frame(frame, resize_faktor=resize_faktor)
-    frame = crop_roi(frame)
-    frame = blur_image(frame, repetitions_blur=repetitions_blur)
+    roi = crop_roi(frame)
+    frame = blur_image(roi, repetitions_blur=repetitions_blur)
     frame = change_color_bgr2gray(frame)
     frame = edge_detection(frame, low_border=canny_lower, upper_border=canny_upper)
     frame = dilate_image(frame, kernel_size=kernel_size)
     # frame = binary_threshold(frame)
 
-    return frame
+    return frame, roi
 
 if __name__ == "__main__":
     """XXX"""

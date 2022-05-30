@@ -6,8 +6,7 @@ import basecar
 import basisklassen_cam
 import datenlogger
 import preprocess_frame as pf
-#import compute_lines as cl
-import compute_lines2 as cl
+import compute_lines as cl
 import steering as st
 
 
@@ -24,6 +23,7 @@ class CamCar(basecar.BaseCar):
         super().__init__()
         self.cam = basisklassen_cam.Camera(thread=False, fps=30)
         self._dl = datenlogger.Datenlogger(log_file_path="Logger")
+        self._folder = ""
         self._active = False
         self._lineframe = None
         self._canny_frame = False
@@ -78,6 +78,12 @@ class CamCar(basecar.BaseCar):
         except:
             print("config.json File Error")
 
+    def save_img(self, frame, angle):
+        filename = str(angle) + ".jpg"
+        folder = self._folder
+        filepath = os.path.join(folder, filename)
+        cv.imwrite(filepath, frame)
+        
     def get_image_bytes(self):
         """Generator for the images from the camera for the live view in dash
 
@@ -118,7 +124,7 @@ class CamCar(basecar.BaseCar):
 
             fixed_scale = self._frame_scale
 
-            canny_frame = pf.preprocess_frame(raw_frame, fixed_scale, self._frame_blur, self._frame_dilation ,self._canny_lower, self._canny_upper)
+            canny_frame, roi = pf.preprocess_frame(raw_frame, fixed_scale, self._frame_blur, self._frame_dilation ,self._canny_lower, self._canny_upper)
             houghes_frame, line_angle = cl.get_lines(canny_frame, self._houghes_threshold, self._houghes_minLineLength, self._houghes_maxLineGap)
 
             steering_angle = st.steering_angle(line_angle)
@@ -127,6 +133,9 @@ class CamCar(basecar.BaseCar):
 
             self._lineframe = self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
 
+            self.save_img(roi, steering_angle)
+            
+            
             print('Parameter-Tuning:', time.perf_counter()-start)
 
         self._lineframe = None
@@ -143,7 +152,7 @@ class CamCar(basecar.BaseCar):
             raw_frame = self.cam.get_frame()
             fixed_scale = self._frame_scale
 
-            canny_frame = pf.preprocess_frame(raw_frame, fixed_scale, self._canny_lower, self._canny_upper)
+            canny_frame, roi = pf.preprocess_frame(raw_frame, fixed_scale, self._canny_lower, self._canny_upper)
             houghes_frame, line_angle = cl.get_lines(canny_frame, self._houghes_threshold, self._houghes_minLineLength, self._houghes_maxLineGap)
 
             steering_angle = st.steering_angle(line_angle)
@@ -151,7 +160,8 @@ class CamCar(basecar.BaseCar):
                 self.steering_angle = steering_angle
 
             self._lineframe = self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
-            time.sleep(0.1)
+
+            self.save_img(roi, steering_angle)
             
         self.stop()
         self.steering_angle = 90
