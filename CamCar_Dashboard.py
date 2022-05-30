@@ -210,7 +210,7 @@ COL_Tuning = [  # Col Tuning
                 ],width=4),
                 dbc.Col([
                     dbc.Button(
-                            children="save params",
+                            children="SAVE PARAMETER",
                             id="btn_save_params",
                             color="dark",
                             n_clicks=0,
@@ -577,35 +577,11 @@ app.layout = dbc.Container(
     [Input("collapse-button-pre", "n_clicks")],
     [State("collapse-pre", "is_open")],
 )
-def toggle_collapse_pre(n, is_open):
-    """Steuert die Collapse-Widgets. 
-    
-    Collapse-Widgets:
-        Pre-Processing
-        Canny
-        Houghes
-    """
-    if n:
-        return not is_open
-    return is_open
-
 @app.callback(
     Output("collapse-canny", "is_open"),
     [Input("collapse-button-canny", "n_clicks")],
     [State("collapse-canny", "is_open")],
 )
-def toggle_collapse_canny(n, is_open):
-    """Steuert die Collapse-Widgets. 
-    
-    Collapse-Widgets:
-        Pre-Processing
-        Canny
-        Houghes
-    """
-    if n:
-        return not is_open
-    return is_open
-
 @app.callback(
     Output("collapse-houghes", "is_open"),
     [Input("collapse-button-houghes", "n_clicks")],
@@ -795,7 +771,7 @@ def button_action(btn_start, btn_stop, btn_save_params, fp, speed):
     changed_id = [p["prop_id"] for p in callback_context.triggered][0]
     if "btn_start" in changed_id:
         if fp == 1:
-            car.parameter_tuning()
+            car.fp_opencv()
         elif fp == 2:
             car.fp_opencv(speed)
         elif fp == 3:
@@ -805,7 +781,7 @@ def button_action(btn_start, btn_stop, btn_save_params, fp, speed):
         car._active = False
         
     if "btn_save_params" in changed_id:
-        car.save_params()
+        car.save_parameters()
 
     return 0
 

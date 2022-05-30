@@ -1,4 +1,5 @@
 import time, os.path
+from datetime import datetime
 import json
 import numpy as np
 import cv2 as cv
@@ -8,7 +9,6 @@ import datenlogger
 import preprocess_frame as pf
 import compute_lines as cl
 import steering as st
-from datetime import datetime
 
 
 class CamCar(basecar.BaseCar):
@@ -19,16 +19,17 @@ class CamCar(basecar.BaseCar):
     """
 
     def __init__(self):
-        """Initialisierung der Klasse CamCar."""
-
+        """Initialisierung der Klasse CamCar.
+        """
         super().__init__()
         self.cam = basisklassen_cam.Camera(thread=False, fps=30)
         self._dl = datenlogger.Datenlogger(log_file_path="Logger")
-        self._folder = ""
         self._active = False
-        self._lineframe = None
+        self._result_frame = None
         self._canny_frame = False
         self._houghLP_frame = False
+        self._folder = ""
+        self._create_img_logger_path()
 
         try: # Parameter aus config.json laden.
             with open("config.json", "rt")as f:
@@ -51,6 +52,39 @@ class CamCar(basecar.BaseCar):
             self._houghes_minLineLength = 70
             self._houghes_maxLineGap = 30
 
+    def _create_img_logger_path(self):
+        """Funktion erstellt Ordner IMG_Logger.
+        """
+        if not os.path.exists('IMG_Logger'):
+            os.makedirs('IMG_Logger')
+
+    def _create_img_logger_folder(self):
+        """Funktion erstellt Unterordner im IMG_Logger.
+        """
+        nowTimestamp = str(datetime.now())
+        strMainFolder = 'IMG_Logger//'
+
+        self._folder = strMainFolder + (nowTimestamp.replace("-", "").replace(":", "").replace(" ", "_")[:15])
+        os.mkdir(self._folder)
+
+    def _start_drive_mode(self, v=None):
+        """Funktion zum Starten des Fahrzustandes.
+        """
+        self._create_img_logger_folder()
+        self._active = True
+        self.steering_angle = 90
+
+        if v != None:
+            self.drive(v)
+
+    @property
+    def _end_drive_mode(self):
+        """Funktion zum Beenden des Fahrzustandes.
+        """
+        self._result_frame = None
+        self.stop()
+        self.steering_angle = 90
+
     @property
     def drive_data(self):
         """Ausgabe der Fahrdaten fuer den Datenlogger.
@@ -60,7 +94,23 @@ class CamCar(basecar.BaseCar):
         """
         return [self.speed, self.direction, self.steering_angle]
 
-    def save_params(self):
+    def save_img(self, frame, angle):
+        """Funktion zur Speicherung von Trainingsbildern.
+
+        Returns:
+            [.jpg]: JPG-File mit Lenkwinkel
+        """
+        filename = str(angle) + ".jpg"
+        folder = self._folder
+        filepath = os.path.join(folder, filename)
+        cv.imwrite(filepath, frame)
+
+    def save_parameters(self):
+        """Funktion zur Speicherung der Paramter aus dem Dashboard.
+
+        Returns:
+            [config.json]: JSON-File mit Einstellungen zum PiCar
+        """
         data = None
         try:
             with open("config.json", "r") as f:
@@ -75,31 +125,26 @@ class CamCar(basecar.BaseCar):
                 data["hough min line length"] = self._houghes_minLineLength
                 data["hough max line gap"] = self._houghes_maxLineGap
                 json.dump(data, f, indent="    ")
-                print("Parameters saved to config.json")
+            print("Parameters saved to config.json")
         except:
             print("config.json File Error")
-
-    def save_img(self, frame, angle):
-        filename = str(angle) + ".jpg"
-        folder = self._folder
-        filepath = os.path.join(folder, filename)
-        cv.imwrite(filepath, frame)
         
     def get_image_bytes(self):
         """Generator for the images from the camera for the live view in dash
 
         Yields:
-            bytes: Bytes string with the image information
+            [bytes]: Bytes string with the image information
         """
         while True:
-            jepg = self.cam.get_jpeg(self._lineframe)
+            jepg = self.cam.get_jpeg(self._result_frame)
 
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + jepg + b'\r\n\r\n')
             time.sleep(0.1)
 
     def build_dash_cam_view(self, frame_scale, raw_frame, canny_frame, houghes_frame):
-        """XXX"""
+        """Funktion zur Erzeugung des Live-Views im Dashboard.
+        """
         result_frame = pf.resize_frame(raw_frame, frame_scale)
 
         if self._canny_frame:
@@ -109,82 +154,44 @@ class CamCar(basecar.BaseCar):
         if self._houghLP_frame:
             result_frame = np.concatenate([result_frame, houghes_frame], axis=0)
 
-        return result_frame
+        self._result_frame = result_frame
 
-    def parameter_tuning(self):
-        """Funktion zur Ausfuerung des Parameter-Tunings."""
-        self._active = True
-        self.steering_angle = 90
-        now = str(datetime.now())
-        self._folder = now.replace("-", "").replace(":", "").replace(" ", "_")[:15]
-        os.mkdir(self._folder)
+    def fp_opencv(self, v=None):
+        """Funktion zur Ausfuerung des Fahrparcours auf Basis OpenCV.
+        """
+        self._start_drive_mode(v)
 
         while self._active:
-            
+
             start = time.perf_counter()
-            
-            raw_frame = self.cam.get_frame()
-            # raw_frame = self.cam.read()
 
+            raw_frame = self.cam.get_frame()
             fixed_scale = self._frame_scale
 
-            canny_frame, roi = pf.preprocess_frame(raw_frame, fixed_scale, self._frame_blur, self._frame_dilation ,self._canny_lower, self._canny_upper)
+            canny_frame, roi = pf.preprocess_frame(raw_frame, fixed_scale, self._frame_blur, self._frame_dilation, self._canny_lower, self._canny_upper)
             houghes_frame, line_angle = cl.get_lines(canny_frame, self._houghes_threshold, self._houghes_minLineLength, self._houghes_maxLineGap)
 
             steering_angle = st.steering_angle(line_angle)
             if steering_angle != 360:
                 self.steering_angle = steering_angle
 
-            self._lineframe = self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
-
+            self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
             self.save_img(roi, steering_angle)
+
+            print(time.perf_counter()-start)
             
-            
-            print('Parameter-Tuning:', time.perf_counter()-start)
+        self._end_drive_mode
 
-        self._lineframe = None
-        self.stop()
+    def fp_deepnn(self, v=None):
+        """Funktion zur Ausfuerung des Fahrparcours auf Basis DeepNN.
+        """
+        self._start_drive_mode(v)
 
-    def fp_opencv(self, v):
-        """Funktion zur Ausfuerung des Fahrparcours auf Basis OpenCV"""
-        self._active = True
-        self.steering_angle = 90
-        now = str(datetime.now())
-        self._folder = now.replace("-", "").replace(":", "").replace(" ", "_")[:15]
-        os.mkdir(self._folder)
-
-        self.drive(v)
-        while self._active:
-
-            raw_frame = self.cam.get_frame()
-            fixed_scale = self._frame_scale
-
-            canny_frame, roi = pf.preprocess_frame(raw_frame, fixed_scale, self._canny_lower, self._canny_upper)
-            houghes_frame, line_angle = cl.get_lines(canny_frame, self._houghes_threshold, self._houghes_minLineLength, self._houghes_maxLineGap)
-
-            steering_angle = st.steering_angle(line_angle)
-            if steering_angle != 360:
-                self.steering_angle = steering_angle
-
-            self._lineframe = self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
-
-            self.save_img(roi, steering_angle)
-            
-        self.stop()
-        self.steering_angle = 90
-
-    def fp_deepnn(self, v):
-        """Funktion zur Ausfuerung des Fahrparcours auf Basis DeepNN"""
-        self._active = True
-        self.steering_angle = 90
-
-        self.drive(v)
         time.sleep(1)
-
         self._active = False
-        self.stop()
-        self.steering_angle = 90
-            
+
+        self._end_drive_mode
+    
 
 if __name__ == "__main__":
     car = CamCar()

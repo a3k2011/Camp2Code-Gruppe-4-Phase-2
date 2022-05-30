@@ -35,7 +35,6 @@ class Camera():
                          int(self.VideoCapture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
         if thread:
             self._queue_drive = queue.Queue(maxsize=1)
-            self._queue_view = queue.Queue(maxsize=1)
             self._thread = threading.Thread(target=self._reader, daemon=True)
             self._thread.start()
 
@@ -59,7 +58,7 @@ class Camera():
         Returns:
             numpy array: returns current frame as numpy array
         """
-        return self._queue.get()
+        return self._queue_drive.get()
         
     def get_frame(self):
         """Returns current frame recorded by the camera
@@ -111,3 +110,14 @@ class Camera():
         """Releases the camera so it can be used by other programs.
         """
         self.VideoCapture.release()
+
+if __name__ == "__main__":
+    cam = Camera(thread=True, fps=30)
+
+    for i in range(20):
+
+        start = time.perf_counter()
+
+        frame = cam.read()
+        print('Shape:', frame.shape)
+        print('Time:', time.perf_counter()-start)

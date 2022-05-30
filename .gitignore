@@ -1,3 +1,4 @@
 *.json
 Logger/
+IMG_Logger/
 __pycache__/
