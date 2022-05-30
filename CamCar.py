@@ -6,8 +6,8 @@ import basecar
 import basisklassen_cam
 import datenlogger
 import preprocess_frame as pf
-import compute_lines as cl
-#import compute_lines2 as cl
+#import compute_lines as cl
+import compute_lines2 as cl
 import steering as st
 
 
@@ -74,6 +74,7 @@ class CamCar(basecar.BaseCar):
                 data["hough min line length"] = self._houghes_minLineLength
                 data["hough max line gap"] = self._houghes_maxLineGap
                 json.dump(data, f, indent="    ")
+                print("Parameters saved to config.json")
         except:
             print("config.json File Error")
 
