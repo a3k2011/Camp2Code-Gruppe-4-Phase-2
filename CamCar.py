@@ -179,7 +179,7 @@ class CamCar(basecar.BaseCar):
             self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
             self.save_img(roi, steering_angle)
 
-            print(time.perf_counter()-start)
+            #print(time.perf_counter()-start)
             
         self._end_drive_mode
 
