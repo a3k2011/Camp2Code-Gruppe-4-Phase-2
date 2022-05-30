@@ -32,7 +32,7 @@ class CamCar(basecar.BaseCar):
         self._houghLP_frame = False
         self._folder = ""
         self._create_img_logger_path()
-        self._cnn_model = tf.keras.models.load_model('cnn_camcar_model.h5')
+        self._cnn_model = tf.keras.models.load_model('cnn_model.h5')
 
         try: # Parameter aus config.json laden.
             with open("config.json", "rt")as f:
