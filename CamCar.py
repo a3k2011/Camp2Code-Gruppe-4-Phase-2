@@ -9,6 +9,7 @@ import datenlogger
 import preprocess_frame as pf
 import compute_lines as cl
 import steering as st
+import uuid
 
 
 class CamCar(basecar.BaseCar):
@@ -100,9 +101,9 @@ class CamCar(basecar.BaseCar):
         Returns:
             [.jpg]: JPG-File mit Lenkwinkel
         """
-        filename = str(angle) + ".jpg"
-        folder = self._folder
-        filepath = os.path.join(folder, filename)
+        img_id = str(uuid.uuid4())
+        filename = str(angle) + "_id_" + img_id + ".jpg"
+        filepath = os.path.join(self._folder, filename)
         cv.imwrite(filepath, frame)
 
     def save_parameters(self):
