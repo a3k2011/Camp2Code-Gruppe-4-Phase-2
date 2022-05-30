@@ -10,6 +10,7 @@ import compute_lines as cl
 #import compute_lines2 as cl
 import steering as st
 
+
 class CamCar(basecar.BaseCar):
     """Die Klasse CamCar fuegt die Funktion der Kamera zur BaseCar-Klasse hinzu.
 
@@ -21,12 +22,14 @@ class CamCar(basecar.BaseCar):
         """Initialisierung der Klasse CamCar."""
 
         super().__init__()
-        #print("Init CamCar")
-        self.cam = basisklassen_cam.Camera()
+        self.cam = basisklassen_cam.Camera(thread=False, fps=30)
         self._dl = datenlogger.Datenlogger(log_file_path="Logger")
         self._active = False
         self._lineframe = None
-        try: # Parameter aus config.json laden
+        self._canny_frame = False
+        self._houghLP_frame = False
+
+        try: # Parameter aus config.json laden.
             with open("config.json", "rt")as f:
                 params = json.load(f)
                 self._frame_scale = params["scale"]
@@ -37,7 +40,7 @@ class CamCar(basecar.BaseCar):
                 self._houghes_threshold = params["hough threshold"]
                 self._houghes_minLineLength = params["hough min line length"]
                 self._houghes_maxLineGap = params["hough max line gap"]
-        except: #Datein nicht vorhanden oder Werte nicht enthalten
+        except: # Dateien nicht vorhanden oder Werte nicht enthalten.
             self._frame_scale = 1
             self._frame_blur = 1
             self._frame_dilation = 2
@@ -47,8 +50,6 @@ class CamCar(basecar.BaseCar):
             self._houghes_minLineLength = 70
             self._houghes_maxLineGap = 30
 
-        self._canny_frame = False
-        self._houghLP_frame = False
     @property
     def drive_data(self):
         """Ausgabe der Fahrdaten fuer den Datenlogger.
@@ -73,11 +74,9 @@ class CamCar(basecar.BaseCar):
                 data["hough min line length"] = self._houghes_minLineLength
                 data["hough max line gap"] = self._houghes_maxLineGap
                 json.dump(data, f, indent="    ")
-                #print("Parameters saved to config.json")
         except:
             print("config.json File Error")
-            
-    
+
     def get_image_bytes(self):
         """Generator for the images from the camera for the live view in dash
 
@@ -114,6 +113,8 @@ class CamCar(basecar.BaseCar):
             start = time.perf_counter()
             
             raw_frame = self.cam.get_frame()
+            # raw_frame = self.cam.read()
+
             fixed_scale = self._frame_scale
 
             canny_frame = pf.preprocess_frame(raw_frame, fixed_scale, self._frame_blur, self._frame_dilation ,self._canny_lower, self._canny_upper)
@@ -125,7 +126,7 @@ class CamCar(basecar.BaseCar):
 
             self._lineframe = self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
 
-            #print(time.perf_counter()-start)
+            print('Parameter-Tuning:', time.perf_counter()-start)
 
         self._lineframe = None
         self.stop()

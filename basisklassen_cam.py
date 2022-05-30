@@ -1,4 +1,7 @@
+import time
 import cv2
+import threading
+import queue
 import matplotlib.pyplot as plt
 
 class Camera():
@@ -23,12 +26,40 @@ class Camera():
     release(): releases the camera, so it can be used again and by other programs
     """
 
-    def __init__(self, skip_frame=2, cam_number=0):
+    def __init__(self, skip_frame=2, cam_number=0, thread=False, fps=30):
         self.skip_frame = skip_frame
         self.VideoCapture = cv2.VideoCapture(cam_number, cv2.CAP_V4L) #,
         self.VideoCapture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        self.VideoCapture.set(cv2.CAP_PROP_FPS, fps)
         self._imgsize = (int(self.VideoCapture.get(cv2.CAP_PROP_FRAME_WIDTH)),
                          int(self.VideoCapture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        if thread:
+            self._queue_drive = queue.Queue(maxsize=1)
+            self._queue_view = queue.Queue(maxsize=1)
+            self._thread = threading.Thread(target=self._reader, daemon=True)
+            self._thread.start()
+
+    def _reader(self):
+        """Put current frame recorded by the camera to the Queue-Object.
+        """
+        while True:
+
+            frame = self.get_frame()
+
+            if not self._queue_drive.empty():
+                try:
+                    self._queue_drive.get_nowait()
+                except Queue.Empty:
+                    pass
+            self._queue_drive.put(frame)
+
+    def read(self):
+        """Returns current frame hold in Queue-Object.
+        
+        Returns:
+            numpy array: returns current frame as numpy array
+        """
+        return self._queue.get()
         
     def get_frame(self):
         """Returns current frame recorded by the camera
