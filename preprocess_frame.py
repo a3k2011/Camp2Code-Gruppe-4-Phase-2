@@ -23,6 +23,22 @@ def crop_roi(frame):
     frame = frame[lower_border:upper_border, :]
     return frame
 
+def filter_hsv(frame, hsv_lower, hsv_upper):
+    """Funktion zur Anwendung des HSV-Filters.
+
+    Args:
+        [hsv_lower]: Untere Grenze des HSV-Filters
+        [hsv_upper]: Obere Grenze des HSV-Filters
+    """
+    hsv_lower_ar = np.array([hsv_lower/2, 0, 0])
+    hsv_upper_ar = np.array([hsv_upper/2, 255, 255])
+    frame_hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+
+    mask_hsv = cv.inRange(frame_hsv, hsv_lower_ar, hsv_upper_ar)
+    frame = cv.bitwise_and(frame, frame, mask=mask_hsv)
+
+    return frame
+
 def blur_image(frame, repetitions_blur):
     """Funktion zum Weichzeichnen des Bildes.
 
@@ -70,14 +86,8 @@ def preprocess_frame(raw_frame, resize_faktor=1, hsv_lower=0, hsv_upper=360, rep
     frame = np.copy(raw_frame)
     frame = resize_frame(frame, resize_faktor=resize_faktor)
     roi = crop_roi(frame)
+    frame = filter_hsv(frame, hsv_lower=hsv_lower, hsv_upper=hsv_upper)
     frame = blur_image(roi, repetitions_blur=repetitions_blur)
-        #Eischub Farbdetektion
-    hsv_lower_ar = np.array([hsv_lower/2, 0, 0])
-    hsv_upper_ar = np.array([hsv_upper/2, 255, 255])
-    frame_hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-    mask_hsv = cv.inRange(frame_hsv, hsv_lower_ar, hsv_upper_ar)
-
-    frame = cv.bitwise_and(frame, frame, mask=mask_hsv)
     frame = change_color_bgr2gray(frame)
     frame = edge_detection(frame, low_border=canny_lower, upper_border=canny_upper)
     frame = dilate_image(frame, kernel_size=kernel_size)
