@@ -972,7 +972,11 @@ def switch_action(sw_canny, sw_houghes):
 def switch_action2(sw_img_logging):
     """Starten und Beenden des Image Loggings."""
 
-    car._img_logging = True if sw_img_logging else False
+    if sw_img_logging:
+        car._create_img_logger_folder()
+        car._img_logging = True
+    else:
+        car._img_logging = False
 
     return f'Image Logging: {sw_img_logging}'
 
