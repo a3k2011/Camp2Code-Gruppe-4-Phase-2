@@ -81,7 +81,6 @@ class CamCar(basecar.BaseCar):
     def _start_drive_mode(self, v=None):
         """Funktion zum Starten des Fahrzustandes.
         """
-        self._create_img_logger_folder()
         self._active = True
         self.steering_angle = 90
 
