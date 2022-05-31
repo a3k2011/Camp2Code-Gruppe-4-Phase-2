@@ -38,7 +38,7 @@ def steering_angle_deepnn(y_pred):
     y_pred = y_pred[0][0]
 
     #steering_angle_car = check_boundaries(y_pred)
-    steering_angle_car = round(steering_angle_car, 1)
+    steering_angle_car = round(y_pred, 1)
 
     return steering_angle_car
 
