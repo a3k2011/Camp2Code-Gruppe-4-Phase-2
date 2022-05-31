@@ -629,11 +629,33 @@ app.layout = dbc.Container(
     [Input("collapse-button-pre", "n_clicks")],
     [State("collapse-pre", "is_open")],
 )
+def toggle_collapse_pre(n, is_open):
+    """Steuert die Collapse-Widgets. 
+    
+    Collapse-Widgets:
+        Pre-Processing
+        Canny
+        Houghes
+    """
+    if n:
+        return not is_open
+    return is_open
 @app.callback(
     Output("collapse-canny", "is_open"),
     [Input("collapse-button-canny", "n_clicks")],
     [State("collapse-canny", "is_open")],
 )
+def toggle_collapse_canny(n, is_open):
+    """Steuert die Collapse-Widgets. 
+    
+    Collapse-Widgets:
+        Pre-Processing
+        Canny
+        Houghes
+    """
+    if n:
+        return not is_open
+    return is_open
 @app.callback(
     Output("collapse-houghes", "is_open"),
     [Input("collapse-button-houghes", "n_clicks")],
