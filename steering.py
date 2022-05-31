@@ -21,7 +21,7 @@ def steering_angle(line_angle):
     Returns:
             [int]: Lenkwinkel
     """
-    line_angle = check_boundaries(line_angle)
+    #line_angle = check_boundaries(line_angle)
 
     if line_angle != 360: 
         steering_angle_car = round(line_angle, 1)
@@ -37,7 +37,7 @@ def steering_angle_deepnn(y_pred):
     """
     y_pred = y_pred[0][0]
 
-    steering_angle_car = check_boundaries(y_pred)
+    #steering_angle_car = check_boundaries(y_pred)
     steering_angle_car = round(steering_angle_car, 1)
 
     return steering_angle_car
