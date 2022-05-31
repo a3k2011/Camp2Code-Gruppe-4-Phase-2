@@ -201,22 +201,26 @@ class CamCar(basecar.BaseCar):
         """
         self._start_drive_mode(v)
 
-        while self._active:
+        if self._cnn_model != None:
 
-            # start = time.perf_counter()
+            input_shape = self._cnn_model.layers[0].input_shape
 
-            raw_frame = self.cam.get_frame()
-            fixed_scale = self._frame_scale
+            while self._active:
 
-            roi, img = pf.preprocess_frame_cnn(raw_frame, fixed_scale)
+                # start = time.perf_counter()
 
-            y_pred = self._cnn_model.predict(img)
-            steering_angle = st.steering_angle_deepnn(y_pred)
-            if steering_angle != 360:
-                self.steering_angle = steering_angle
+                raw_frame = self.cam.get_frame()
+                fixed_scale = self._frame_scale
 
-            self._result_frame = roi
+                roi, img = pf.preprocess_frame_cnn(raw_frame, fixed_scale, input_shape)
 
-            # print(time.perf_counter()-start)
+                y_pred = self._cnn_model.predict(img)
+                steering_angle = st.steering_angle_deepnn(y_pred)
+                if steering_angle != 360:
+                    self.steering_angle = steering_angle
+
+                self._result_frame = roi
+
+                # print(time.perf_counter()-start)
 
         self._end_drive_mode

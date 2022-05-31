@@ -81,6 +81,17 @@ def binary_threshold(frame):
     th, frame = cv.threshold(frame, 0, 255, cv.THRESH_BINARY)
     return frame
 
+def fit_shape(frame, input_shape):
+    """Funktion zur Anpassung der input shape.
+    """
+    if input_shape[3] == 1:
+        frame = change_color_bgr2gray(frame)
+
+    if input_shape[1] != frame.shape[0] or input_shape[2] != frame.shape[1]:
+        frame = cv.resize(frame, (input_shape[1], input_shape[2]), interpolation = cv.INTER_CUBIC)
+
+    return frame
+
 def preprocess_frame(raw_frame, resize_faktor=1, hsv_lower=0, hsv_upper=360, repetitions_blur=1, kernel_size=3, canny_lower=50, canny_upper= 125):
     """Funktionen fuer das Preprocessing fuer das OpenCV CamCar.
     """
@@ -96,14 +107,15 @@ def preprocess_frame(raw_frame, resize_faktor=1, hsv_lower=0, hsv_upper=360, rep
 
     return frame, roi
 
-def preprocess_frame_cnn(raw_frame, resize_faktor=1):
+def preprocess_frame_cnn(raw_frame, resize_faktor=1, input_shape=(None, 216, 640, 3)):
     """Funktion fuer das Preprocessing fuer das DeepNN CamCar.
     """
     frame = np.copy(raw_frame)
     frame = resize_frame(frame, resize_faktor=resize_faktor)
     roi = crop_roi(frame)
-    img = roi/255
-    img = img.reshape(1, img.shape[0], img.shape[1], img.shape[2])
+    img = fit_shape(roi, input_shape=input_shape)
+    img = img/255
+    img = img.reshape(1, input_shape[1], input_shape[2], input_shape[3])
 
     return roi, img
 
