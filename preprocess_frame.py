@@ -31,6 +31,7 @@ def filter_hsv(frame, hsv_lower, hsv_upper):
         [hsv_upper]: Obere Grenze des HSV-Filters
     """
     hsv_lower_ar = np.array([hsv_lower/2, 0, 0])
+    # hsv_lower_ar = np.array([hsv_lower/2, 40, 40])
     hsv_upper_ar = np.array([hsv_upper/2, 255, 255])
     frame_hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
 
