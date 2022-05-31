@@ -4,12 +4,25 @@ import preprocess_frame as pf
 import compute_lines as cl
 import cv2 as cv
 
+def check_boundaries(steering_angle):
+    """Pruefung des linken und rechten Anschlaegs"""
+
+    if steering_angle != 360:
+        if steering_angle < 50:
+            steering_angle = 50
+        elif steering_angle > 130:
+            steering_angle = 130
+
+    return steering_angle
+
 def steering_angle(line_angle):
     """Umrechung des Lenkwinkels anhand HoughesLineP Line Angle.
 
     Returns:
             [int]: Lenkwinkel
     """
+    line_angle = check_boundaries(line_angle)
+
     if line_angle != 360: 
         steering_angle_car = round(line_angle, 1)
         return steering_angle_car
@@ -22,13 +35,12 @@ def steering_angle_deepnn(y_pred):
     Returns:
             [int]: Lenkwinkel
     """
-    steering_angle_car = round(y_pred[0][0], 1)
-    # print('Predicted Steering Angle:', steering_angle_car)
+    y_pred = y_pred[0][0]
 
-    if steering_angle_car >= 50 and steering_angle_car <= 130:
-        return steering_angle_car
-    else:
-        return 360
+    steering_angle_car = check_boundaries(y_pred)
+    steering_angle_car = round(steering_angle_car, 1)
+
+    return steering_angle_car
 
 if __name__ == "__main__":
     cam = basisklassen_cam.Camera()
