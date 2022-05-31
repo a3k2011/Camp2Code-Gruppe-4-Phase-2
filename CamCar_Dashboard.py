@@ -218,6 +218,11 @@ COL_Tuning = [  # Col Tuning
                             n_clicks=0,
                         ),
                 ],width=2),
+                dbc.Col([
+                    dbc.Switch(id="switch_img_logging",
+                        label=""
+                        ),
+                ],width=4),
             ]),
             dbc.Switch(id="switch_canny",
                         label=""
@@ -853,7 +858,6 @@ def slider_action(scale, hsv_lower, hsv_upper, blur, dilation, canny_lower, cann
             'Houghes-minLineLength: "{}"'.format(houghes_minLineLength),\
             'Houghes-maxLineGap: "{}"'.format(houghes_maxLineGap)
 
-
 @app.callback(
     Output('switch_canny', 'label'),
     Output('switch_houghes', 'label'),
@@ -869,6 +873,16 @@ def switch_action(sw_canny, sw_houghes):
     return f'Canny Edge Detection: {sw_canny}',\
             f'Houghes Lines: {sw_houghes}'
 
+@app.callback(
+    Output('switch_img_logging', 'label'),
+    Input('switch_img_logging', 'value'),
+)
+def switch_action2(sw_img_logging):
+    """Starten und Beenden des Image Loggings."""
+
+    car._img_logging = True if sw_img_logging else False
+
+    return f'Image Logging: {sw_img_logging}'
 
 if __name__ == "__main__":
     """Main-Programm der Dashboard App"""

@@ -1,5 +1,8 @@
 import time, os.path
 from datetime import datetime
+import os
+import glob
+import re
 import json
 import numpy as np
 import cv2 as cv
@@ -27,12 +30,13 @@ class CamCar(basecar.BaseCar):
         self.cam = basisklassen_cam.Camera(thread=False, fps=30)
         self._dl = datenlogger.Datenlogger(log_file_path="Logger")
         self._active = False
+        self._img_logging = False
         self._result_frame = None
         self._canny_frame = False
         self._houghLP_frame = False
         self._folder = ""
         self._create_img_logger_path()
-        #self._cnn_model = tf.keras.models.load_model('cnn_model.h5')
+        self._cnn_model = self._load_h5_model()
 
         try: # Parameter aus config.json laden.
             with open("config.json", "rt")as f:
@@ -58,6 +62,15 @@ class CamCar(basecar.BaseCar):
             self._houghes_threshold = 40
             self._houghes_minLineLength = 70
             self._houghes_maxLineGap = 30
+
+    def _load_h5_model(self):
+        """Funktion laedt das .h5 model.
+        """
+        listFilesPaths = [filename for filename in glob.glob('*') if bool(re.search(r'\.h5', os.path.basename(filename)))]
+        if listFilesPaths:
+            return tf.keras.models.load_model(listFilesPaths[0])
+        else:
+            print("Es wurde keine .h5 Datei gefunden.")
 
     def _create_img_logger_path(self):
         """Funktion erstellt Ordner IMG_Logger.
@@ -185,7 +198,9 @@ class CamCar(basecar.BaseCar):
                 self.steering_angle = steering_angle
 
             self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
-            self.save_img(roi, steering_angle)
+
+            if self._img_logging:
+                self.save_img(roi, steering_angle)
 
             # print(time.perf_counter()-start)
             
