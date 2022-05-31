@@ -36,7 +36,7 @@ class CamCar(basecar.BaseCar):
         self._houghLP_frame = False
         self._folder = ""
         self._create_img_logger_path()
-        self._cnn_model = self._load_h5_model()
+        self._cnn_model = None
 
         try: # Parameter aus config.json laden.
             with open("config.json", "rt")as f:
@@ -62,15 +62,6 @@ class CamCar(basecar.BaseCar):
             self._houghes_threshold = 40
             self._houghes_minLineLength = 70
             self._houghes_maxLineGap = 30
-
-    def _load_h5_model(self):
-        """Funktion laedt das .h5 model.
-        """
-        listFilesPaths = [filename for filename in glob.glob('*') if bool(re.search(r'\.h5', os.path.basename(filename)))]
-        if listFilesPaths:
-            return tf.keras.models.load_model(listFilesPaths[0])
-        else:
-            print("Es wurde keine .h5 Datei gefunden.")
 
     def _create_img_logger_path(self):
         """Funktion erstellt Ordner IMG_Logger.

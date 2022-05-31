@@ -1,4 +1,5 @@
 import os, json, time
+import glob, re
 import socket
 import pandas as pd
 import datetime
@@ -8,6 +9,7 @@ from dash.dependencies import Input, Output, State
 import dash_daq as daq
 import dash_bootstrap_components as dbc
 from flask import Flask, Response, request
+import tensorflow as tf
 import CamCar as CC
 
 """Initialisiere DataFrame und Car."""
@@ -80,6 +82,15 @@ def getLoggerFiles():
             outputList.reverse()
     return outputList
 
+def get_cnn_models():
+    """Models im Dropdown auflisten
+
+    Returns:
+        list: CNN-Models
+    """
+    listFilesPaths = [filename for filename in glob.glob('*') if bool(re.search(r'\.h5', os.path.basename(filename)))]
+
+    return listFilesPaths
 
 def getLogItemsList():
     """Definition der Spaltennamen für die Daten im Logfile
@@ -111,6 +122,9 @@ FP_LISTE = [  # Liste der auswählbaren Fahrprogramme
     {"label": "FP 2 --- OpenCV", "value": 2},
     {"label": "FP 3 --- DeepNN", "value": 3},
 ]
+
+"""Liste der .h5 Models."""
+CNN_MODEL_LISTE = get_cnn_models()
 
 """CARDS der KPI."""
 kpi_1 = dbc.Card([dbc.CardBody([html.H6("vMax"), html.P(id="kpi1")])])
@@ -468,9 +482,22 @@ COL_Fahrzeugsteuerung = [  # Col Fahrzeugsteuerung
                 id="dd_Fahrprogramm",
                 placeholder="Bitte Fahrprogramm wählen:",
                 options=FP_LISTE,
-                value=0,
-                style={"color": "black"},
-            )
+                multi=False,
+                style={"color": "black",
+                        "marginBottom": 5},
+            ),
+            # Dropdown CNN Model
+            html.Div(
+                dcc.Dropdown(
+                    id="dd_cnn_model",
+                    placeholder="Bitte CNN-Model wählen:",
+                    options=CNN_MODEL_LISTE,
+                    multi=False,
+                    style={"color": "black"},
+                ),
+                id="div_dd_cnn_model",
+                style={'display':'none'},
+            ),
         ]
     ),
     dbc.Row(
@@ -682,7 +709,7 @@ def joystick_values(angle, force, switch, max_Speed):
 
 def computeKPI(data):
     """Berechnung der Kenndaten des Log-Files.
-
+nötig
     Args:
         data (pandas.DataFrame): Log-Daten als DataFrame
 
@@ -763,6 +790,31 @@ def updateFileList(value):
 
 
 @app.callback(
+    Output("div_dd_cnn_model", "style"),
+    Input("dd_Fahrprogramm", "value"),
+)
+def dd_model_action(fp):
+    """Steuert das Dropdown des CNN-Models."""
+    if fp == 3:
+        dropdown_style = {'display':'block'}
+    else:
+        dropdown_style = {'display':'none'}
+
+    return dropdown_style
+
+
+@app.callback(
+    Output("dd_cnn_model", "style"),
+    Input("dd_cnn_model", "value"),
+)
+def dd_model_action2(value):
+    """Laedt das .h5 model in das CamCar."""
+    if value:
+        car._cnn_model = tf.keras.models.load_model(value)
+    return {"color": "green"}
+
+
+@app.callback(
     Output("spinner", "style"),
     Input("btn_start", "n_clicks"),
     Input("btn_stop", "n_clicks"),
@@ -812,6 +864,22 @@ def button_action(btn_start, btn_stop, btn_save_params, fp, speed):
 
 
 @app.callback(
+    Output("slider_speed", "value"),
+    Input("slider_speed", "value"),
+)
+def speed_slider_action(speed):
+    """Manuelle Steuerung der Geschwindigkeit im Betrieb.
+
+    Returns:
+        int: Geschwindigkeit
+    """
+    if car._active:
+        car.speed = speed
+
+    return speed
+
+
+@app.callback(
     Output('output-container-scale-slider', 'children'),
     Output('output-container-hsv_lower-slider', 'children'),
     Output('output-container-hsv_upper-slider', 'children'),
@@ -858,6 +926,7 @@ def slider_action(scale, hsv_lower, hsv_upper, blur, dilation, canny_lower, cann
             'Houghes-minLineLength: "{}"'.format(houghes_minLineLength),\
             'Houghes-maxLineGap: "{}"'.format(houghes_maxLineGap)
 
+
 @app.callback(
     Output('switch_canny', 'label'),
     Output('switch_houghes', 'label'),
@@ -873,6 +942,7 @@ def switch_action(sw_canny, sw_houghes):
     return f'Canny Edge Detection: {sw_canny}',\
             f'Houghes Lines: {sw_houghes}'
 
+
 @app.callback(
     Output('switch_img_logging', 'label'),
     Input('switch_img_logging', 'value'),
@@ -883,6 +953,7 @@ def switch_action2(sw_img_logging):
     car._img_logging = True if sw_img_logging else False
 
     return f'Image Logging: {sw_img_logging}'
+
 
 if __name__ == "__main__":
     """Main-Programm der Dashboard App"""
