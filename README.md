@@ -6,17 +6,24 @@ kann das Modellauto betrieben werden.
 
 #### Ausführung des Programms
 Das Modellauto kann über ein Plotly-Dashboard im Webbrowser angesteuert werden.
-* PiCar_Dashboard.py
+* CamCar_Dashboard.py
 
 #### Anleitung zum Sunfounder PiCar-S
 https://github.com/sunfounder/SunFounder_PiCar-S
 
 #### Funktionen des PiCars
 Das hier bereitgestellte Programm zum PiCar verfügt über die folgenden Funktionen:
-* ...
-* ...
-* Fahrparcour 1-2
+* Fahrparcour mit OpenCV
+* Fahrparcour mit DeepNN
 * Manuelle Steuerung des PiCars über das Plotly-Dashboard im Webbrowser
+
+Das Plotly-Dashboard verfügt über die folgenden Funktionen:
+* Live-View der PiCar-Kamera
+* Ausführung der Fahrparcours
+* Parameter-Tuning zur Bildvorverarbeitung
+* Speicherung der Parameter in die config.json
+* Visualisierung der KPI's
+* Visualisierung der Fahrdaten aus dem Datenlogger
 
 ## Installation notwendiger Software auf dem RP4
 ### OS
@@ -81,13 +88,12 @@ Alle notwendigen Bibliotheken können entweder manuell installiert werden (Siehe
 * ./OpenCV‑4‑5‑5.sh
   * sudo reboot
 ## Fahrparcours
-#### FP1 - Vorwärts und Rückwärts
-Das Auto fährt mit langsamer Geschwindigkeit 3 Sekunden geradeaus, stoppt für 1 Sekunde und fährt 3 Sekunden rückwärts.
-#### FP2 - Kreisfahrt mit maximalem Lenkwinkel
-Das Auto fährt 1 Sekunde geradeaus, dann für 8 Sekunden mit maximalem Lenkwinkel im Uhrzeigersinn und stoppt.
-Dann soll das Auto diesen Fahrplan in umgekehrter Weise abfahren und an den Ausgangspunkt zurückkehren.
-Die Vorgehensweise soll für eine Fahrt im entgegengesetzen Uhrzeigersinn wiederholt werden.
-## GIT-Wiki:
+#### FP1 - Parameter-Tuning
+Das Auto ist im Stillstand. Anhand der Live-View können Canny Edge Detection und HoughLinesP aktiviert werden. Alle zur Verfügung gestellten Parameter können live angepasst und in die config.json gespeichert werden.
+#### FP2 - OpenCV
+Das Auto fährt mit der im Slider eingestellten Geschwindigkeit und nutzt die OpenCV Lane Detection auf Basis der definierten Parameter, um das PiCar durch den Fahrparcour zu lenken.
+#### FP2 - OpenCV
+Das Auto fährt mit der im Slider eingestellten Geschwindigkeit und nutzt die DeepNN Lane Detection (cnn_model.h5), um das PiCar durch den Fahrparcour zu lenken.## GIT-Wiki:
 ### GIT-Einrichtung (RP4)
 #### SSH erzeugen
 * ssh-keygen -o (Beide Abfragen leer bestätigen, ausser man möchte auch ein Passwort vergeben.)
@@ -128,16 +134,21 @@ Die Vorgehensweise soll für eine Fahrt im entgegengesetzen Uhrzeigersinn wieder
 2. git add --all oder (git add beispiel.txt)
 3. git commit -m "Hier steht das Kommentar"
    * (Optional: Erweitern des letzten Commits)
-   * git commit --amend
+   * git commit --amend -m "Das ist die richtige Message"
 4. git push
 
 #### Entfernen der Änderungen im Staging-Bereich
 * git reset
 
+### Commit rückgängig machen
+* git reset HEAD~
+
 ## .gitignore
 Ignoriert im Arbeitsverzeichnis die folgenden Dateien bzw. Ordner:
 * \*.json
+* \*.h5
 * /Logger
+* /IMG_Logger
 * /\__pycache__
 
 ## SD-Karte klonen / Backup
