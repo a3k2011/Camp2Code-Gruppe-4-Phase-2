@@ -64,13 +64,20 @@ def binary_threshold(frame):
     th, frame = cv.threshold(frame, 0, 255, cv.THRESH_BINARY)
     return frame
 
-def preprocess_frame(raw_frame, resize_faktor=1, repetitions_blur=1, kernel_size=3, canny_lower=50, canny_upper= 125):
+def preprocess_frame(raw_frame, resize_faktor=1, hsv_lower=0, hsv_upper=360, repetitions_blur=1, kernel_size=3, canny_lower=50, canny_upper= 125):
     """Funktionen fuer das Preprocessing fuer das OpenCV CamCar.
     """
     frame = np.copy(raw_frame)
     frame = resize_frame(frame, resize_faktor=resize_faktor)
     roi = crop_roi(frame)
     frame = blur_image(roi, repetitions_blur=repetitions_blur)
+        #Eischub Farbdetektion
+    hsv_lower_ar = np.array([hsv_lower/2, 0, 0])
+    hsv_upper_ar = np.array([hsv_upper/2, 255, 255])
+    frame_hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+    mask_hsv = cv.inRange(frame_hsv, hsv_lower_ar, hsv_upper_ar)
+
+    frame = cv.bitwise_and(frame, frame, mask=mask_hsv)
     frame = change_color_bgr2gray(frame)
     frame = edge_detection(frame, low_border=canny_lower, upper_border=canny_upper)
     frame = dilate_image(frame, kernel_size=kernel_size)

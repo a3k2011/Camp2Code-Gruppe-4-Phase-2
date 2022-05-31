@@ -15,6 +15,8 @@ df = None
 car = CC.CamCar()
 
 car_scale = 1/car._frame_scale
+car_hsv_lower = car._hsv_lower
+car_hsv_upper = car._hsv_upper
 car_blur = car._frame_blur
 car_dilation = car._frame_dilation
 car_canny_lower = car._canny_lower
@@ -240,6 +242,24 @@ COL_Tuning = [  # Col Tuning
                             step=1,
                             id="slider_scale",
                             value=car_scale,
+                            updatemode="drag",
+                            ),
+                            html.Div(id='output-container-hsv_lower-slider'),
+                            dcc.Slider(
+                            min=0,
+                            max=360,
+                            step=5,
+                            id="slider_hsv_lower",
+                            value=car_hsv_lower,
+                            updatemode="drag",
+                            ),
+                            html.Div(id='output-container-hsv_upper-slider'),
+                            dcc.Slider(
+                            min=0,
+                            max=360,
+                            step=5,
+                            id="slider_hsv_upper",
+                            value=car_hsv_upper,
                             updatemode="drag",
                             ),
                             html.Div(id='output-container-blur-slider'),
@@ -788,6 +808,8 @@ def button_action(btn_start, btn_stop, btn_save_params, fp, speed):
 
 @app.callback(
     Output('output-container-scale-slider', 'children'),
+    Output('output-container-hsv_lower-slider', 'children'),
+    Output('output-container-hsv_upper-slider', 'children'),
     Output('output-container-blur-slider', 'children'),
     Output('output-container-dilation-slider', 'children'),
     Output('output-container-canny-lower-slider', 'children'),
@@ -796,6 +818,8 @@ def button_action(btn_start, btn_stop, btn_save_params, fp, speed):
     Output('output-container-houghes_minLineLength', 'children'),
     Output('output-container-houghes_maxLineGap', 'children'),
     Input("slider_scale", "value"),
+    Input("slider_hsv_lower", "value"),
+    Input("slider_hsv_upper", "value"),
     Input("slider_blur", "value"),
     Input("slider_dilation", "value"),
     Input("slider_canny_lower", "value"),
@@ -805,9 +829,11 @@ def button_action(btn_start, btn_stop, btn_save_params, fp, speed):
     Input("slider_houghes_maxLineGap", "value"),
     Input("interval_startup", "n_intervals"),
 )
-def slider_action(scale, blur, dilation, canny_lower, canny_upper, houghes_threshold, houghes_minLineLength, houghes_maxLineGap, interval_startup):
+def slider_action(scale, hsv_lower, hsv_upper, blur, dilation, canny_lower, canny_upper, houghes_threshold, houghes_minLineLength, houghes_maxLineGap, interval_startup):
     """Anpassung der Werte aus dem Parameter Tuning im Car-Objekt."""
     car._frame_scale = 1/scale
+    car._hsv_lower = hsv_lower
+    car._hsv_upper =hsv_upper
     car._frame_blur = blur
     car._frame_dilation = dilation
     car._canny_lower = canny_lower
@@ -817,6 +843,8 @@ def slider_action(scale, blur, dilation, canny_lower, canny_upper, houghes_thres
     car._houghes_maxLineGap = houghes_maxLineGap
 
     return 'Frame-Scale: "{}"'.format(scale),\
+            'HSV-Lower: "{}"'.format(hsv_lower),\
+            'HSV-Upper: "{}"'.format(hsv_upper),\
             'Gaussian-Blur Repitions: "{}"'.format(blur),\
             'Dilation-Kernel-Size: "{}"'.format(dilation),\
             'Canny-Lower: "{}"'.format(canny_lower),\

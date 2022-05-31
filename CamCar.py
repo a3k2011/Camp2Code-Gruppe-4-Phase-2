@@ -32,12 +32,14 @@ class CamCar(basecar.BaseCar):
         self._houghLP_frame = False
         self._folder = ""
         self._create_img_logger_path()
-        self._cnn_model = tf.keras.models.load_model('cnn_model.h5')
+        #self._cnn_model = tf.keras.models.load_model('cnn_model.h5')
 
         try: # Parameter aus config.json laden.
             with open("config.json", "rt")as f:
                 params = json.load(f)
                 self._frame_scale = params["scale"]
+                self._hsv_lower = params["hsv lower"]
+                self._hsv_upper = params["hsv upper"]
                 self._frame_blur = params["blur"]
                 self._frame_dilation = params["dilation"]
                 self._canny_lower = params["canny lower"]
@@ -47,6 +49,8 @@ class CamCar(basecar.BaseCar):
                 self._houghes_maxLineGap = params["hough max line gap"]
         except: # Dateien nicht vorhanden oder Werte nicht enthalten.
             self._frame_scale = 1
+            self._hsv_lower = 0
+            self._hsv_upper = 360
             self._frame_blur = 1
             self._frame_dilation = 2
             self._canny_lower = 50
@@ -120,6 +124,8 @@ class CamCar(basecar.BaseCar):
                 data = json.load(f)
             with open("config.json", "w") as f:
                 data["scale"] = self._frame_scale
+                data["hsv lower"] = self._hsv_lower
+                data["hsv upper"] = self._hsv_upper
                 data["blur"] = self._frame_blur
                 data["dilation"] = self._frame_dilation
                 data["canny lower"] = self._canny_lower
@@ -171,7 +177,7 @@ class CamCar(basecar.BaseCar):
             raw_frame = self.cam.get_frame()
             fixed_scale = self._frame_scale
 
-            canny_frame, roi = pf.preprocess_frame(raw_frame, fixed_scale, self._frame_blur, self._frame_dilation, self._canny_lower, self._canny_upper)
+            canny_frame, roi = pf.preprocess_frame(raw_frame, fixed_scale, self._hsv_lower, self._hsv_upper, self._frame_blur, self._frame_dilation, self._canny_lower, self._canny_upper)
             houghes_frame, line_angle = cl.get_lines(canny_frame, self._houghes_threshold, self._houghes_minLineLength, self._houghes_maxLineGap)
 
             steering_angle = st.steering_angle(line_angle)
