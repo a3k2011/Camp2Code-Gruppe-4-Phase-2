@@ -87,7 +87,7 @@ def fit_shape(frame, input_shape):
         frame = change_color_bgr2gray(frame)
 
     if input_shape[1] != frame.shape[0] or input_shape[2] != frame.shape[1]:
-        frame = cv.resize(frame, (input_shape[1], input_shape[2]), interpolation = cv.INTER_CUBIC)
+        frame = cv.resize(frame, (input_shape[2], input_shape[1]), interpolation = cv.INTER_CUBIC)
 
     return frame
 
