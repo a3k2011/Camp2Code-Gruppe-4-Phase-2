@@ -210,16 +210,16 @@ class CamCar(basecar.BaseCar):
                 # start = time.perf_counter()
 
                 raw_frame = self.cam.get_frame()
-                fixed_scale = self._frame_scale
 
-                roi, img = pf.preprocess_frame_cnn(raw_frame, fixed_scale, input_shape)
+                roi, img = pf.preprocess_frame_cnn(raw_frame, 1, input_shape)
 
                 y_pred = self._cnn_model.predict(img)
                 steering_angle = st.steering_angle_deepnn(y_pred)
+
                 if steering_angle != 360:
                     self.steering_angle = steering_angle
 
-                self._result_frame = roi
+                self._result_frame = np.concatenate([raw_frame, roi], axis=0)
 
                 # print(time.perf_counter()-start)
 
