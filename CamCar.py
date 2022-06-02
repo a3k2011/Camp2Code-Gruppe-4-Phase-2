@@ -14,6 +14,7 @@ import compute_lines as cl
 import steering as st
 import uuid
 import tensorflow as tf
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
 
 
 class CamCar(basecar.BaseCar):
@@ -37,6 +38,7 @@ class CamCar(basecar.BaseCar):
         self._folder = ""
         self._create_img_logger_path()
         self._cnn_model = None
+        self._lmodel = None
 
         try: # Parameter aus config.json laden.
             with open("config.json", "rt")as f:
@@ -196,17 +198,24 @@ class CamCar(basecar.BaseCar):
             
         self._end_drive_mode
 
-    def fp_deepnn(self, v=None):
+    def fp_deepnn(self, v=None, tflite=False):
         """Funktion zur Ausfuerung des Fahrparcours auf Basis DeepNN.
         """
-        self._start_drive_mode(v)
-
+        
         if self._cnn_model != None:
 
+            # Keras
             input_shape = self._cnn_model.layers[0].input_shape
-            
             for layer in self._cnn_model.layers:
                 layer.trainable = False
+
+            if tflite:
+                # TF-Lite
+                lmodel = LiteModel.from_keras_model(self._cnn_model)
+                print('TF-Lite erzeugt.')
+            
+            # Starte Drive-Mode
+            self._start_drive_mode(v)
 
             while self._active:
 
@@ -215,7 +224,13 @@ class CamCar(basecar.BaseCar):
                 raw_frame = self.cam.get_frame()
                 roi, img = pf.preprocess_frame_cnn(raw_frame, 1, input_shape)
 
-                y_pred = self._cnn_model(img).numpy()
+                if tflite:
+                    y_pred = lmodel.predict_single(img[0])
+                    print('TF')
+                else:
+                    y_pred = self._cnn_model(img).numpy()
+                    print('Keras')
+
                 steering_angle = st.steering_angle_deepnn(y_pred)
 
                 if steering_angle != 360:
@@ -226,3 +241,32 @@ class CamCar(basecar.BaseCar):
                 # print(time.perf_counter()-start)
 
         self._end_drive_mode
+
+class LiteModel():
+    
+    @classmethod
+    def from_keras_model(cls, kmodel):
+        converter = tf.lite.TFLiteConverter.from_keras_model(kmodel)
+        converter.experimental_new_converter=False
+        tflite_model = converter.convert()
+        return LiteModel(tf.lite.Interpreter(model_content=tflite_model))
+    
+    def __init__(self, interpreter):
+        self.interpreter = interpreter
+        self.interpreter.allocate_tensors()
+        input_det = self.interpreter.get_input_details()[0]
+        output_det = self.interpreter.get_output_details()[0]
+        self.input_index = input_det["index"]
+        self.output_index = output_det["index"]
+        self.input_shape = input_det["shape"]
+        self.output_shape = output_det["shape"]
+        self.input_dtype = input_det["dtype"]
+        self.output_dtype = output_det["dtype"]
+    
+    def predict_single(self, inp):
+        """ Like predict(), but only for a single record. The input data can be a Python list. """
+        inp = np.array([inp], dtype=self.input_dtype)
+        self.interpreter.set_tensor(self.input_index, inp)
+        self.interpreter.invoke()
+        out = self.interpreter.get_tensor(self.output_index)
+        return out

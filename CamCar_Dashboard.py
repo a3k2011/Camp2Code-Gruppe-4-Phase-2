@@ -121,6 +121,7 @@ FP_LISTE = [  # Liste der auswählbaren Fahrprogramme
     {"label": "FP 1 --- Parameter-Tuning", "value": 1},
     {"label": "FP 2 --- OpenCV", "value": 2},
     {"label": "FP 3 --- DeepNN", "value": 3},
+    {"label": "FP 4 --- DeepNN - TFLite", "value": 4},
 ]
 
 """Liste der .h5 Models."""
@@ -817,7 +818,7 @@ def updateFileList(value):
 )
 def dd_model_action(fp):
     """Steuert das Dropdown des CNN-Models."""
-    if fp == 3:
+    if fp == 3 or fp == 4:
         dropdown_style = {'display':'block'}
     else:
         dropdown_style = {'display':'none'}
@@ -875,6 +876,8 @@ def button_action(btn_start, btn_stop, btn_save_params, fp, speed):
             car.fp_opencv(speed)
         elif fp == 3:
             car.fp_deepnn(speed)
+        elif fp == 4:
+            car.fp_deepnn(speed, tflite=True)
 
     if "btn_stop" in changed_id:
         car._active = False
