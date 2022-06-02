@@ -28,7 +28,7 @@ class CamCar(basecar.BaseCar):
         """Initialisierung der Klasse CamCar.
         """
         super().__init__()
-        self.cam = basisklassen_cam.Camera(thread=False, fps=30)
+        self.cam = basisklassen_cam.Camera(skip_frame=2, thread=False, fps=30)
         self._dl = datenlogger.Datenlogger(log_file_path="Logger")
         self._active = False
         self._img_logging = False
