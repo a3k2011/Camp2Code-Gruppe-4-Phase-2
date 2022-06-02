@@ -213,13 +213,9 @@ class CamCar(basecar.BaseCar):
                 # start = time.perf_counter()
 
                 raw_frame = self.cam.get_frame()
-
                 roi, img = pf.preprocess_frame_cnn(raw_frame, 1, input_shape)
 
-                start = time.perf_counter()
-                y_pred = self._cnn_model.predict(img)
-                print(time.perf_counter()-start)
-
+                y_pred = self._cnn_model(img).numpy()
                 steering_angle = st.steering_angle_deepnn(y_pred)
 
                 if steering_angle != 360:
