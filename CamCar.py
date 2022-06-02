@@ -212,7 +212,7 @@ class CamCar(basecar.BaseCar):
             if tflite:
                 # TF-Lite
                 lmodel = LiteModel.from_keras_model(self._cnn_model)
-                print('TF-Lite erzeugt.')
+                print('TF-Lite erzeugt!')
             
             # Starte Drive-Mode
             self._start_drive_mode(v)
@@ -226,10 +226,8 @@ class CamCar(basecar.BaseCar):
 
                 if tflite:
                     y_pred = lmodel.predict_single(img[0])
-                    print('TF')
                 else:
                     y_pred = self._cnn_model(img).numpy()
-                    print('Keras')
 
                 steering_angle = st.steering_angle_deepnn(y_pred)
 
