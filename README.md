@@ -15,6 +15,7 @@ https://github.com/sunfounder/SunFounder_PiCar-S
 Das hier bereitgestellte Programm zum PiCar verfügt über die folgenden Funktionen:
 * Fahrparcour mit OpenCV
 * Fahrparcour mit DeepNN
+* Fahrparcour mit DeepNN - TFLite
 * Manuelle Steuerung des PiCars über das Plotly-Dashboard im Webbrowser
 
 Das Plotly-Dashboard verfügt über die folgenden Funktionen:
@@ -92,8 +93,12 @@ Alle notwendigen Bibliotheken können entweder manuell installiert werden (Siehe
 Das Auto ist im Stillstand. Anhand der Live-View können Canny Edge Detection und HoughLinesP aktiviert werden. Alle zur Verfügung gestellten Parameter können live angepasst und in die config.json gespeichert werden.
 #### FP2 - OpenCV
 Das Auto fährt mit der im Slider eingestellten Geschwindigkeit und nutzt die OpenCV Lane Detection auf Basis der definierten Parameter, um das PiCar durch den Fahrparcour zu lenken.
-#### FP2 - OpenCV
-Das Auto fährt mit der im Slider eingestellten Geschwindigkeit und nutzt die DeepNN Lane Detection (cnn_model.h5), um das PiCar durch den Fahrparcour zu lenken.## GIT-Wiki:
+#### FP3 - DeepNN
+Das Auto fährt mit der im Slider eingestellten Geschwindigkeit und nutzt die DeepNN Lane Detection (cnn_model.h5), um das PiCar durch den Fahrparcour zu lenken. (Keras-Architektur)
+#### FP3 - DeepNN - TFLite
+Das Auto fährt mit der im Slider eingestellten Geschwindigkeit und nutzt die DeepNN Lane Detection (cnn_model.h5), um das PiCar durch den Fahrparcour zu lenken.
+(TFLite-Architektur)
+## GIT-Wiki:
 ### GIT-Einrichtung (RP4)
 #### SSH erzeugen
 * ssh-keygen -o (Beide Abfragen leer bestätigen, ausser man möchte auch ein Passwort vergeben.)
