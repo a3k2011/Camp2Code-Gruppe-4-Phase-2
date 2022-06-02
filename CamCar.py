@@ -204,6 +204,9 @@ class CamCar(basecar.BaseCar):
         if self._cnn_model != None:
 
             input_shape = self._cnn_model.layers[0].input_shape
+            
+            for layer in self._cnn_model.layers:
+                layer.trainable = False
 
             while self._active:
 
@@ -213,7 +216,10 @@ class CamCar(basecar.BaseCar):
 
                 roi, img = pf.preprocess_frame_cnn(raw_frame, 1, input_shape)
 
+                start = time.perf_counter()
                 y_pred = self._cnn_model.predict(img)
+                print(time.perf_counter()-start)
+
                 steering_angle = st.steering_angle_deepnn(y_pred)
 
                 if steering_angle != 360:
