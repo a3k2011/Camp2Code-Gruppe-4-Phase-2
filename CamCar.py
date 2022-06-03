@@ -85,6 +85,7 @@ class CamCar(basecar.BaseCar):
         """
         self._active = True
         self.steering_angle = 90
+        self._dl.start()
 
         if v != None:
             self.drive(v)
@@ -94,6 +95,7 @@ class CamCar(basecar.BaseCar):
         """Funktion zum Beenden des Fahrzustandes.
         """
         self._result_frame = None
+        self._dl.save()
         self.stop()
         self.steering_angle = 90
 
@@ -189,6 +191,7 @@ class CamCar(basecar.BaseCar):
             if steering_angle != 360:
                 self.steering_angle = steering_angle
 
+            # self._dl.append(self.drive_data)
             self.build_dash_cam_view(fixed_scale, raw_frame, canny_frame, houghes_frame)
 
             if self._img_logging:
@@ -234,6 +237,7 @@ class CamCar(basecar.BaseCar):
                 if steering_angle != 360:
                     self.steering_angle = steering_angle
 
+                # self._dl.append(self.drive_data)
                 self._result_frame = np.concatenate([raw_frame, roi], axis=0)
 
                 # print(time.perf_counter()-start)
