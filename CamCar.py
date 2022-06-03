@@ -197,7 +197,7 @@ class CamCar(basecar.BaseCar):
             if self._img_logging:
                 self.save_img(roi, steering_angle)
 
-            # print(time.perf_counter()-start)
+            # print('Durchlauf OpenCV: ', time.perf_counter()-start)
             
         self._end_drive_mode
 
@@ -240,7 +240,7 @@ class CamCar(basecar.BaseCar):
                 # self._dl.append(self.drive_data)
                 self._result_frame = np.concatenate([raw_frame, roi], axis=0)
 
-                # print(time.perf_counter()-start)
+                # print('Durchlauf CNN: ', time.perf_counter()-start)
 
         self._end_drive_mode
 
