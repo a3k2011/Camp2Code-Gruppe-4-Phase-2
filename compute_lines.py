@@ -3,7 +3,7 @@ import numpy as np
 from math import *
 import sys 
 
-
+# werden keine gültigen Spuren erkannt kommt als Rückgabewert 360
 angle_invalid = 360
 
 def intercept_point(line1, line2):    
@@ -35,7 +35,7 @@ def line_pt_from_line_nf(line_nf, image):
     Returns:
         _type_: [x1,y1,x2,y2]
     """
-    #was führt hier zur exception???
+    
     height = image.shape[0]
     m,t = line_nf
     y1 = height
@@ -67,6 +67,17 @@ def line_nf_from_line_pt(line):
     return [m, t]
 
 def line_calc(image, lines, offset, color):
+    """calculates lines and draws it on top of the image with given color and offset in x
+
+    Args:
+        image (_type_): image to draw the lines on
+        lines (_type_): line in 2-point form
+        offset (_type_): x-offset 
+        color (_type_): color in tuples (B,G,R)
+
+    Returns:
+        image, lines: return the given image with drawn lines and a list with the lines in normal form
+    """
     lines_nf = []
     lines_nf.clear()
     for line in lines:
@@ -74,7 +85,7 @@ def line_calc(image, lines, offset, color):
         x1 = x1+ offset
         x2 = x2+ offset
         line_nf = (line_nf_from_line_pt([x1, y1, x2, y2]))
-        if line_nf[0] != np.infty:
+        if line_nf[0] != np.infty: # unendliche Steigung wollen wir nicht
             if (abs(line_nf[0])> 0.25): # Steigung: horizontale Linien werden ausgeblendet
                 lines_nf.append(line_nf) 
                     # einzeichnen der selektierten Linien
@@ -97,7 +108,7 @@ def average_lines(lines_pt_l, lines_pt_r, image):
     image, lines_nf_l = line_calc(image, lines_pt_l, 0, (255,0,255))
     image, lines_nf_r = line_calc(image, lines_pt_r, width//2, (0,0,255))
     
-    if len(lines_nf_l)>0 and len(lines_nf_r)>0:
+    if len(lines_nf_l)>0 and len(lines_nf_r)>0: # nur wenn es links und rechts etwas gibt
         line_left_av_nf = np.average(lines_nf_l, axis=0)
         line_right_av_nf = np.average(lines_nf_r, axis=0)
         line_left_lane_middle = line_pt_from_line_nf(line_left_av_nf, image)
@@ -112,11 +123,8 @@ def average_lines(lines_pt_l, lines_pt_r, image):
             
             return [[[0,0,0,0], [0,0,0,0],[0,0,0,0]], angle_invalid]   
         else:
-            
-        
-        
         # berechnen der mittleren Linie,
-        # der Offset ist zum Ausgleich eines Parallelen Versatzes zu den Linien
+        # der Offset ist zum Ausgleich eines parallelen Versatzes zu den Linien
             x_line_mid = xl+(xr-xl)//2
             x_frame_mid = width//2
             x_offset = x_line_mid - x_frame_mid
@@ -141,12 +149,12 @@ def average_lines(lines_pt_l, lines_pt_r, image):
         return [[line_left_lane_middle, line_right_lane_middle], angle_invalid] 
     
 # Parameter for Hough 
-
 rho = 1 #Pixel width of result
 theta = np.pi/180 #
 #threshold = 40 # Threshold: min number of sections to detect a line
 #minLineLength = 70 #min 40 px length to detect a line
 #maxLineGap = 30#less px gaps get closed
+
 
 def masked_image(image):
     """masks a triangle in the lower middle of the image because there is not sure if the line is from left or right
@@ -157,6 +165,7 @@ def masked_image(image):
     Returns:
         _type_: image with masked out area
     """
+    # die Maske wurde erstellt da es bei sehr schräg zur Fahrbahn stehendem PiCar in der Mitte vor dem Car oft falsch interpretierte Linien gab
     height, width = image.shape
     polygons = np.array([
         [(0, height),
@@ -172,6 +181,12 @@ def masked_image(image):
     masked_image = cv.bitwise_and(image, mask)
     return masked_image
 
+
+
+# Hauptfunktion: 
+#   -bekommt ein Canny-Bild und Parameter für die Houghes-Transformation
+#   -gibt ein Bild ein einen berechneten Winkel zwischen Bild und Fahrbahn zurück
+
 def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
     """searches for lines in an image
     eliminates horizontal lines
@@ -183,6 +198,7 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
     Returns:
         _type_: image, direction in degree, 90 is straight
     """
+    
     image = masked_image(image)
     
     height, width = image.shape
@@ -190,7 +206,8 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
     image_r = image[:,width//2:]
     lines_pt_l = cv.HoughLinesP(image_l,rho,theta,threshold,None,minLineLength,maxLineGap )
     lines_pt_r = cv.HoughLinesP(image_r,rho,theta,threshold,None,minLineLength,maxLineGap )
-    if (lines_pt_l is not None) and (lines_pt_r is not None) :
+    # wenn links und rechts eine Linie gefunden wurde
+    if (lines_pt_l is not None) and (lines_pt_r is not None):
         text_lines = str(len(lines_pt_l)+len(lines_pt_r))+" lines found"
         frame_marked = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
         """
@@ -218,7 +235,7 @@ def get_lines(image, threshold=40, minLineLength=70,maxLineGap=30):
             cv.putText(image,"Error drawing line",org=(10,20),fontFace=cv.FONT_HERSHEY_COMPLEX,fontScale=0.8,color=(0,0,255),thickness=1)
             cv.putText(image,"LW invalid",org=(10,50),fontFace=cv.FONT_HERSHEY_COMPLEX,fontScale=0.8,color=(0,255,0),thickness=1)
             return image, angle_invalid
-    else:
+    else: 
         image = cv.cvtColor(image, cv.COLOR_GRAY2RGB)
         cv.putText(image,"No lines found",org=(10,20),fontFace=cv.FONT_HERSHEY_COMPLEX,fontScale=0.8,color=(0,255,0),thickness=1)
         cv.putText(image,"LW invalid", org=(10,50),fontFace=cv.FONT_HERSHEY_COMPLEX,fontScale=0.8, color=(0,255,0),thickness=1)
